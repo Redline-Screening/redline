@@ -1,0 +1,44 @@
+"""Redline: entry point, sign-in gate and navigation."""
+import streamlit as st
+
+from redline import auth, ui
+
+st.set_page_config(page_title="Redline", layout="wide")
+ui.apply_style()
+
+missing = auth.missing_settings()
+if missing:
+    st.error("Configuration incomplete. Missing settings: " + ", ".join(missing))
+    st.stop()
+
+try:
+    user = auth.current_user()
+except auth.SignInError as e:
+    st.error(str(e))
+    st.stop()
+
+if user is None:
+    st.navigation([st.Page("views/login.py", title="Sign In")], position="hidden").run()
+    st.stop()
+
+page = st.navigation(
+    {
+        "Portfolio": [
+            st.Page("views/overview.py", title="Overview", default=True),
+        ],
+        "Setup": [
+            st.Page("views/universe.py", title="1. Investment Universe", url_path="universe"),
+            st.Page("views/criteria.py", title="2. Exclusion Criteria", url_path="criteria"),
+            st.Page("views/sources.py", title="3. Data Sources", url_path="sources"),
+        ],
+        "Analysis": [
+            st.Page("views/screening.py", title="Screening"),
+            st.Page("views/risk.py", title="Risk Assessment"),
+            st.Page("views/alerts.py", title="Alerts"),
+        ],
+    }
+)
+with st.sidebar:
+    st.text(user.email or "")
+    st.button("Sign out", on_click=auth.sign_out, key="sign-out")
+page.run()
