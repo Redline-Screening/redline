@@ -57,14 +57,14 @@ def _norm_column(name: str) -> str:
     return re.sub(r"\s+", " ", re.sub(r"[_\-().]", " ", name.lower())).strip()
 
 
-def map_columns(columns) -> dict:
+def map_columns(columns, aliases=ALIASES) -> dict:
     """Field -> column name."""
     normal = {}
     for c in columns:
         normal.setdefault(_norm_column(c), c)
     mapping = {}
-    for field, aliases in ALIASES.items():
-        for alias in aliases:
+    for field, names in aliases.items():
+        for alias in names:
             if alias in normal:
                 mapping[field] = normal[alias]
                 break

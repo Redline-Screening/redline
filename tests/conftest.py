@@ -26,6 +26,10 @@ class FakeTable:
         self.op, self.records, self.keys = "upsert", records, on_conflict.split(",")
         return self
 
+    def insert(self, records):
+        self.op, self.records, self.keys = "upsert", records, ["id"]
+        return self
+
     def delete(self):
         self.op = "delete"
         return self

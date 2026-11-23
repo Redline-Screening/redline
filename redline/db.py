@@ -75,12 +75,23 @@ def save_score(record: dict) -> None:
     _run(auth.client().table("scores").upsert([record], on_conflict="holding_id,criterion_id"))
 
 
+def save_scores(records: list[dict]) -> None:
+    """All records need the same columns. All are saved or none."""
+    if records:
+        _run(auth.client().table("scores").upsert(records, on_conflict="holding_id,criterion_id"))
+
+
 def delete_score(holding_id: str, criterion_id: str) -> None:
     _run(auth.client().table("scores").delete().eq("holding_id", holding_id).eq("criterion_id", criterion_id))
 
 
 def alerts() -> list[dict]:
     return _all("alerts", "date", desc=True)
+
+
+def add_alerts(records: list[dict]) -> None:
+    if records:
+        _run(auth.client().table("alerts").insert(records))
 
 
 def workspace() -> dict:

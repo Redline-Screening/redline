@@ -1,0 +1,3 @@
+Company Name,ISIN,Incident Date,Headline,Severity,Source URL,ESG Issues
+Logitech International,CH0025751329,2026-11-20,Sample incident for import testing,High,https://example.com/sample-incident,Military
+Unlisted Example,,2026-11-20,Sample incident for an unknown company,Low,https://example.com/unknown,Military

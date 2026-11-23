@@ -85,5 +85,5 @@ with st.container(border=True, key="panel-analyst"):
             else:
                 ui.set_notice("Assessment saved.")
                 st.rerun()
-    if score.get("exposure_kind") == "analyst" and st.button("Delete assessment"):
+    if score and st.button("Delete assessment"):
         confirm_delete(holding["id"], cid)

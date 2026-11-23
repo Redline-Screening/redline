@@ -56,7 +56,7 @@ TEMPLATES = [
         "key": "adult", "label": "Adult entertainment",
         "description": "Production or distribution of adult entertainment.",
         "threshold": 0, "watch_at": 50, "controversy_limit": "high",
-        "keywords": ["adult", "pornograph"],
+        "keywords": ["adult", "pornography", "pornographic"],
     },
     {
         "key": "forced-labour", "label": "Forced labour in supply chain",
@@ -71,3 +71,16 @@ TEMPLATES = [
         "keywords": ["human rights", "corruption", "bribery", "violation", "global compact"],
     },
 ]
+
+MODES = {
+    "provider": ("Data provider", "Revenue shares from provider files. Web search remains available for controversies."),
+    "ai": ("AI screening", "AI estimates of revenue exposure and web search for controversies. No data licence required."),
+    "both": ("Data provider and AI", "Provider figures take priority. AI covers controversies and missing figures."),
+}
+
+PROVIDERS = {
+    "iss": "ISS STOXX",
+    "msci": "MSCI ESG Research",
+    "sustainalytics": "Morningstar Sustainalytics",
+    "other": "Other provider",
+}
