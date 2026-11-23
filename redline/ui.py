@@ -4,7 +4,7 @@ import streamlit as st
 # Containers with a key starting "panel" are drawn as white panels.
 _CSS = """
 <style>
-[class*="st-key-panel"], [data-testid="stForm"] { background: #FFFFFF; }
+[class*="st-key-panel"], [data-testid="stForm"], [data-testid="stMetric"] { background: #FFFFFF; }
 </style>
 """
 
@@ -38,3 +38,14 @@ def page_header(title: str, subtitle: str) -> None:
 def empty_panel(key: str, text: str) -> None:
     with st.container(border=True, key=f"panel-{key}"):
         st.write(text)
+
+
+def set_notice(text: str) -> None:
+    """Show a confirmation after the next rerun."""
+    st.session_state["_notice"] = text
+
+
+def show_notice() -> None:
+    text = st.session_state.pop("_notice", None)
+    if text:
+        st.success(text)
