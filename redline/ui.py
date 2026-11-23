@@ -1,6 +1,8 @@
 """Shared page elements."""
 import streamlit as st
 
+from redline.rules import LABELS
+
 # Containers with a key starting "panel" are drawn as white panels.
 _CSS = """
 <style>
@@ -49,3 +51,45 @@ def show_notice() -> None:
     text = st.session_state.pop("_notice", None)
     if text:
         st.success(text)
+
+
+_STATE_COLOURS = {
+    "breach": ("#F7E3E1", "#9C2F27"), "watch": ("#FAF0DB", "#85570F"), "clear": ("#E2F0E7", "#2B6B45"),
+    "partial": ("#E9EDF3", "#4A5870"), "na": ("#E9EDF3", "#4A5870"),
+}
+_BY_LABEL = {LABELS[k]: v for k, v in _STATE_COLOURS.items()}
+
+
+def status_style(frame, column: str = "Status"):
+    """Colour the status column of a table."""
+    def css(value):
+        back, text = _BY_LABEL.get(value, ("", ""))
+        return f"background-color: {back}; color: {text}" if back else ""
+    return frame.style.map(css, subset=[column])
+
+
+def setup_steps(holdings, criteria, workspace) -> list[dict]:
+    return [
+        {"page": "views/universe.py", "title": "1. Investment Universe", "done": bool(holdings)},
+        {"page": "views/criteria.py", "title": "2. Exclusion Criteria", "done": any(c["active"] for c in criteria)},
+        {"page": "views/sources.py", "title": "3. Data Sources", "done": bool(workspace.get("mode"))},
+    ]
+
+
+def setup_progress(steps) -> None:
+    """Progress of the three setup steps. The first open step is the primary action."""
+    current = next((s for s in steps if not s["done"]), None)
+    with st.container(border=True, key="panel-setup"):
+        st.subheader("Setup", anchor=False)
+        for column, step in zip(st.columns(3), steps):
+            with column:
+                st.markdown(f"**{step['title']}**")
+                st.caption("Complete" if step["done"] else "Next step" if step is current else "Open")
+                if st.button("Edit" if step["done"] else "Continue", key=f"setup-{step['page']}",
+                             type="primary" if step is current else "secondary",
+                             disabled=not step["done"] and step is not current):
+                    st.switch_page(step["page"])
+
+
+def next_step(page: str, title: str) -> None:
+    st.page_link(page, label=f"Next step: {title}", icon=":material/arrow_forward:")

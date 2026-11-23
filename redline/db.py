@@ -22,12 +22,12 @@ def _run(query):
         raise DataError("The database is not reachable. Try again shortly.") from e
 
 
-def _all(table: str, order: str, desc: bool = False) -> list[dict]:
+def _all(table: str, order: str, desc: bool = False, then: str = "id") -> list[dict]:
     rows = []
     while True:
         page = _run(
             auth.client().table(table).select("*")
-            .order(order, desc=desc).order("id")
+            .order(order, desc=desc).order(then)
             .range(len(rows), len(rows) + _PAGE - 1)
         )
         rows += page
@@ -64,3 +64,33 @@ def save_criteria(records: list[dict]) -> None:
 def delete_criteria(ids: list[str]) -> None:
     if ids:
         _run(auth.client().table("criteria").delete().in_("id", ids))
+
+
+def scores() -> list[dict]:
+    return _all("scores", "holding_id", then="criterion_id")
+
+
+def save_score(record: dict) -> None:
+    """Insert or update one score. Columns left out of the record keep their value."""
+    _run(auth.client().table("scores").upsert([record], on_conflict="holding_id,criterion_id"))
+
+
+def delete_score(holding_id: str, criterion_id: str) -> None:
+    _run(auth.client().table("scores").delete().eq("holding_id", holding_id).eq("criterion_id", criterion_id))
+
+
+def alerts() -> list[dict]:
+    return _all("alerts", "date", desc=True)
+
+
+def workspace() -> dict:
+    rows = _run(auth.client().table("workspaces").select("*"))
+    return rows[0] if rows else {}
+
+
+def save_workspace(fields: dict) -> None:
+    """Columns left out keep their value."""
+    user = auth.current_user()
+    if user is None:
+        raise DataError("The session has ended. Sign in again.")
+    _run(auth.client().table("workspaces").upsert([{"user_id": user.id, **fields}], on_conflict="user_id"))

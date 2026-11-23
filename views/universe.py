@@ -176,3 +176,6 @@ with st.container(border=True, key="panel-add"):
         upload_panel()
     with add_tab:
         add_panel()
+
+if companies:
+    ui.next_step("views/criteria.py", "Exclusion Criteria")

@@ -22,12 +22,17 @@ class FakeTable:
         self.span = (a, b + 1)
         return self
 
-    def upsert(self, records, **_):
-        self.op, self.records = "upsert", records
+    def upsert(self, records, on_conflict="id"):
+        self.op, self.records, self.keys = "upsert", records, on_conflict.split(",")
         return self
 
     def delete(self):
         self.op = "delete"
+        return self
+
+    def eq(self, col, value):
+        before = self.match
+        self.match = lambda r: before(r) and r[col] == value
         return self
 
     def in_(self, col, values):
@@ -37,8 +42,10 @@ class FakeTable:
     def execute(self):
         if self.op == "upsert":
             for rec in self.records:
-                rec = {"id": f"new{len(self.rows)}", **rec}
-                old = next((r for r in self.rows if r["id"] == rec["id"]), None)
+                rec = dict(rec)
+                if self.keys == ["id"]:
+                    rec.setdefault("id", f"new{len(self.rows)}")
+                old = next((r for r in self.rows if all(r.get(k) == rec.get(k) for k in self.keys)), None)
                 old.update(rec) if old else self.rows.append(rec)
         elif self.op == "delete":
             self.rows[:] = [r for r in self.rows if not self.match(r)]
@@ -82,11 +89,12 @@ class FakeAuth:
 
 @pytest.fixture
 def make_app():
-    def make(signed_in=True, secrets=True):
+    def make(signed_in=True, secrets=True, **tables):
         app = AppTest.from_file(APP, default_timeout=20)
         for k in ("SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY", "SIGNUP_ACCESS_CODE"):
             app.secrets[k] = ("the-code" if k == "SIGNUP_ACCESS_CODE" else "x") if secrets else ""
         app.session_state["_supabase"] = FakeClient(signed_in)
+        app.session_state["_supabase"].tables.update(tables)
         return app.run()
 
     return make

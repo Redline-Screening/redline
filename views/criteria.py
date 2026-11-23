@@ -136,3 +136,6 @@ with st.container(border=True, key="panel-add"):
         template_panel()
     with custom_tab:
         custom_panel()
+
+if items:
+    ui.next_step("views/sources.py", "Data Sources")
