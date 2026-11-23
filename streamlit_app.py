@@ -38,6 +38,11 @@ page = st.navigation(
         ],
     }
 )
+# Leaving the Screening page pauses a running screening after its current check.
+run = st.session_state.get("screening_run")
+if run and page.url_path != "screening":
+    run["active"] = False
+
 with st.sidebar:
     st.text(user.email or "")
     st.button("Sign out", on_click=auth.sign_out, key="sign-out")

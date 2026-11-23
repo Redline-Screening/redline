@@ -29,23 +29,30 @@ def alert_record(finding, company) -> dict:
 
 
 def save_result(sb, company, result) -> None:
-    fields = ("id", "holding_id", "criterion_id", "category", "title", "summary", "date", "severity", "sources",
+    fields = ("id", "holding_id", "criterion_id", "category", "title", "summary", "date", "date_type", "severity", "sources",
               "status", "first_seen", "last_seen")
     for f in result.new:
         f["id"] = str(uuid.uuid4())
         f["holding_id"] = company["id"]
+    for f in result.updated:
+        f.setdefault("date_type", "reported")
     records = [{k: f[k] for k in fields} for f in [*result.new, *result.updated]]
     if records:
         sb.table("findings").upsert(records, on_conflict="id").execute()
     if result.alerts:
         sb.table("alerts").upsert([alert_record(f, company) for f in result.alerts], on_conflict="finding_id").execute()
+    raised = {f["id"] for f in result.alerts}
+    for f in result.updated:    # corrected text reaches an existing alert without reopening it
+        if f["id"] not in raised:
+            sb.table("alerts").update({"title": f["title"], "summary": f["summary"], "date": f["date"]}) \
+                .eq("finding_id", f["id"]).execute()
     for cid, columns in result.scores.items():
         if columns:
             sb.table("scores").upsert([{"holding_id": company["id"], "criterion_id": cid, **columns}],
                                       on_conflict="holding_id,criterion_id").execute()
 
 
-def run_check(sb, client, company, criteria, *, web=True, model=MODEL_MANUAL, max_searches=SEARCHES_MANUAL):
+def run_check(sb, client, company, criteria, *, web=True, estimate=True, model=MODEL_MANUAL, max_searches=SEARCHES_MANUAL):
     """Screens one company against the criteria and saves the result.
 
     Raises LimitReached before anything is spent, or screening.ScreeningError.
@@ -67,7 +74,7 @@ def run_check(sb, client, company, criteria, *, web=True, model=MODEL_MANUAL, ma
 
     try:
         result = screening.screen(client, model=model, company=company, criteria=criteria, scores=scores,
-                                  findings=findings, web=web, max_searches=max_searches)
+                                  findings=findings, web=web, max_searches=max_searches, estimate=estimate)
     except screening.ScreeningError as e:
         finish("failed", e.usage)
         raise

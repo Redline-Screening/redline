@@ -4,6 +4,7 @@ Each browser session has its own Supabase client in st.session_state. It must
 never be cached with st.cache_resource, which is shared between users.
 """
 import hmac
+import time
 
 import streamlit as st
 from supabase import Client, ClientOptions, create_client
@@ -87,3 +88,13 @@ def sign_out() -> None:
     except AuthError:
         pass
     st.session_state.clear()
+
+
+def ensure_fresh(seconds: int = 900) -> None:
+    """Renew the access token if it would expire during a long check."""
+    session = client().auth.get_session()
+    if session and session.expires_at and session.expires_at - time.time() < seconds:
+        try:
+            client().auth.refresh_session()
+        except AuthError as e:
+            raise SignInError("The session has ended. Sign in again.") from e

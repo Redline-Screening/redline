@@ -135,3 +135,6 @@ MODEL_MANUAL = "claude-sonnet-5-5"
 MODEL_MONITOR = "claude-haiku-5-5"
 SEARCHES_MANUAL = 4
 SEARCHES_MONITOR = 2
+
+AI_NOTE = ("AI checks are funded privately for this school project and limited per day. "
+           "Contact victoria.gueissaz@student.unisg.com for a higher limit.")

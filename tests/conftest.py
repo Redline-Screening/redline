@@ -60,9 +60,13 @@ class FakeTable:
 class FakeClient:
     def __init__(self, signed_in):
         self.auth, self.tables = FakeAuth(signed_in), {}
+        self.status = {"user": 15, "global": 60, "budget": 20, "remaining": 15}
 
     def table(self, name):
         return FakeTable(self.tables.setdefault(name, []))
+
+    def rpc(self, name, args=None):
+        return SimpleNamespace(execute=lambda: SimpleNamespace(data=self.status))
 
 
 class FakeAuth:
@@ -72,7 +76,7 @@ class FakeAuth:
 
     @staticmethod
     def _session():
-        return SimpleNamespace(user=SimpleNamespace(id="u1", email="a@example.com"))
+        return SimpleNamespace(user=SimpleNamespace(id="u1", email="a@example.com"), expires_at=None)
 
     def get_session(self):
         return self.session
@@ -97,6 +101,7 @@ def make_app():
         app = AppTest.from_file(APP, default_timeout=20)
         for k in ("SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY", "SIGNUP_ACCESS_CODE"):
             app.secrets[k] = ("the-code" if k == "SIGNUP_ACCESS_CODE" else "x") if secrets else ""
+        app.secrets["ANTHROPIC_API_KEY"] = "x"
         app.session_state["_supabase"] = FakeClient(signed_in)
         app.session_state["_supabase"].tables.update(tables)
         return app.run()

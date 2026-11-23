@@ -1,6 +1,7 @@
 import streamlit as st
 
 from redline import auth, ui
+from redline.constants import AI_NOTE
 
 _, middle, _ = st.columns([1, 1.4, 1])
 with middle:
@@ -31,3 +32,5 @@ with middle:
                 if signed_in:
                     st.rerun()
                 st.info("Confirm the email address, then sign in.")
+
+    st.caption(AI_NOTE)

@@ -105,3 +105,12 @@ def save_workspace(fields: dict) -> None:
     if user is None:
         raise DataError("The session has ended. Sign in again.")
     _run(auth.client().table("workspaces").upsert([{"user_id": user.id, **fields}], on_conflict="user_id"))
+
+
+def findings() -> list[dict]:
+    return _all("findings", "last_seen", desc=True)
+
+
+def ai_status() -> dict:
+    """Remaining AI checks: {user, global, budget, remaining}."""
+    return _run(auth.client().rpc("ai_status"))

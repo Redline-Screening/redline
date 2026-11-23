@@ -1,6 +1,10 @@
 """Shared page elements."""
+import re
+from urllib.parse import urlsplit
+
 import streamlit as st
 
+from redline.constants import FINDING_CATEGORIES
 from redline.rules import LABELS
 
 # Containers with a key starting "panel" are drawn as white panels.
@@ -93,3 +97,23 @@ def setup_progress(steps) -> None:
 
 def next_step(page: str, title: str) -> None:
     st.page_link(page, label=f"Next step: {title}", icon=":material/arrow_forward:")
+
+
+def finding_date(finding) -> str:
+    if not finding.get("date"):
+        return "Date unknown"
+    return f"{'Event' if finding.get('date_type') == 'event' else 'Reported'}: {finding['date']}"
+
+
+def finding_card(finding) -> None:
+    """One finding. AI and source texts are shown as plain text, never as markup."""
+    with st.container(border=True, key=f"panel-finding-{finding['id']}"):
+        st.text(finding["title"])
+        st.caption(" | ".join([f"Severity: {finding['severity']}", FINDING_CATEGORIES.get(finding["category"], "Other"),
+                               finding_date(finding)]))
+        st.text(finding["summary"])
+        with st.container(horizontal=True):
+            for i, source in enumerate(finding["sources"]):
+                if re.match(r"https?://", source["url"], re.I):
+                    host = re.sub(r"[^a-z0-9.-]", "", urlsplit(source["url"]).netloc.lower().removeprefix("www."))
+                    st.link_button(host or "Source", source["url"], help=None, type="tertiary")

@@ -222,6 +222,10 @@ class SB:
             def eq(self, *_): return self
             def in_(self, *_): return self
 
+            def update(self, values):
+                sb.calls.append((name + ":update", values))
+                return self
+
             def upsert(self, rows, on_conflict):
                 sb.calls.append((name, rows))
                 return self
@@ -271,3 +275,37 @@ def test_unknown_cost_stays_reserved():
     assert sb.calls[1][1]["p_cost"] == 0
     with pytest.raises(sc.ScreeningError, match="unavailable"):
         service.run_check(SB({"id": "t"}), Fake(api_error(anthropic.BadRequestError, 400, "credit balance too low")), META, [MIL])
+
+
+# Roles and dates
+def test_prompt_asks_for_role_and_event_date():
+    p = sc.build_prompt(META, [MIL], {}, {}, web=True)
+    assert "exact role" in p and "Never present a publication date" in p
+
+
+def test_date_types():
+    r = run(Fake(reply(search(URL), text(answer(finding(date_type="event"), finding(title="Second", date_type="?"))))))
+    assert [f["date_type"] for f in r.new] == ["event", "reported"]
+
+
+def test_known_finding_is_corrected():
+    item = finding(known_id="F1", title="Meta supplies Army headset contractor", severity="medium", date="2025-09-01", date_type="event")
+    old = stored(date="2026-05-18", date_type="reported")
+    r = run(Fake(reply(search(URL), text(answer(item)))), known=[old])
+    f = r.updated[0]
+    assert (f["title"], f["date"], f["date_type"]) == ("Meta supplies Army headset contractor", "2025-09-01", "event")
+    assert not r.alerts
+    again = run(Fake(reply(search(URL), text(answer({**item, "date": "2026-01-01", "date_type": "reported"})))), known=[f])
+    assert again.updated[0]["date"] == "2025-09-01"
+
+
+def test_corrections_reach_the_alert_without_reopening():
+    sb = SB({"id": "t"})
+    service.save_result(sb, META, sc.Result(updated=[stored()]))
+    update = dict(sb.calls)["alerts:update"]
+    assert "status" not in update and update["title"] == "Army headset contract"
+
+
+def test_provider_mode_saves_no_estimate():
+    r = run(Fake(reply(search(URL), text(answer()))), estimate=False)
+    assert "exposure" not in r.scores["c1"] and "likelihood" in r.scores["c1"]
