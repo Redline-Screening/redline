@@ -150,5 +150,5 @@ def test_findings_are_shown(make_app):
     app = open_page(make_app, findings=[f], scores=[s])
     assert not app.exception
     assert "Title *x*" in [t.value for t in app.text]
-    assert any("Reported: 2026-05-18" in c.value for c in app.caption)
+    assert any("Reported: 2026-05-18" in c.value.replace("\\", "") for c in app.caption)
     assert list(app.dataframe[0].value["Status"]) == ["Breach"]

@@ -124,7 +124,8 @@ def build_prompt(company, criteria, scores, known, *, web, since=None, today=Non
                  "incident occurs, in the next 12 months.")
     if web:
         lines.append("Dates: use the day the event happened (date_type event) when a source gives it, for example the contract award "
-                     "or ruling. Otherwise use the publication date (date_type reported) and, if known, state the month or year of "
+                     "or ruling. If the event is itself an announcement, such as a partnership, policy change or statement made that "
+                     "day, its date is an event date. Otherwise use the publication date (date_type reported) and, if known, state the month or year of "
                      "the event in the summary. Never present a publication date as the event date.")
     lines.append(f'''Your final message must be only one JSON object:
 {{"criteria": [{{"id": string, "exposure_pct": number or null, "exposure_basis": string (max 25 words),

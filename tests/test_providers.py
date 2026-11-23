@@ -108,4 +108,5 @@ def test_page(make_app):
     app.switch_page("views/overview.py").run()
     assert [m.value for m in app.metric] == ["8.00%", "0.00%", "1", "3 of 10"]
     app.switch_page("views/alerts.py").run()
-    assert not app.exception and list(app.dataframe[0].value["Company"]) == ["LOGN"]
+    assert not app.exception
+    assert any("Logitech International" in c.value and "RepRisk" in c.value for c in app.caption)

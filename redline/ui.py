@@ -105,15 +105,23 @@ def finding_date(finding) -> str:
     return f"{'Event' if finding.get('date_type') == 'event' else 'Reported'}: {finding['date']}"
 
 
-def finding_card(finding) -> None:
-    """One finding. AI and source texts are shown as plain text, never as markup."""
-    with st.container(border=True, key=f"panel-finding-{finding['id']}"):
-        st.text(finding["title"])
-        st.caption(" | ".join([f"Severity: {finding['severity']}", FINDING_CATEGORIES.get(finding["category"], "Other"),
-                               finding_date(finding)]))
-        st.text(finding["summary"])
+def incident_card(key, title, facts, summary, sources) -> None:
+    """Titles, summaries and links come from AI, sources or users: shown as plain text, never as markup."""
+    with st.container(border=True, key=f"panel-incident-{key}"):
+        st.text(title)
+        st.caption(" | ".join(re.sub(r"([\\`*_{}\[\]()#+!|<>~$:])", r"\\\1", x) for x in facts if x))
+        if summary:
+            st.text(summary)
         with st.container(horizontal=True):
-            for i, source in enumerate(finding["sources"]):
+            for source in sources:
                 if re.match(r"https?://", source["url"], re.I):
                     host = re.sub(r"[^a-z0-9.-]", "", urlsplit(source["url"]).netloc.lower().removeprefix("www."))
-                    st.link_button(host or "Source", source["url"], help=None, type="tertiary")
+                    st.link_button(host or "Source", source["url"], type="tertiary")
+
+
+def finding_card(finding) -> None:
+    incident_card(
+        finding["id"], finding["title"],
+        [f"Severity: {finding['severity']}", FINDING_CATEGORIES.get(finding["category"], "Other"), finding_date(finding)],
+        finding["summary"], finding["sources"],
+    )
