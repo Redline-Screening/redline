@@ -55,17 +55,19 @@ def figures_panel() -> None:
         names = providers.categories(table)
         if len(names) > 60:
             raise importers.ImportProblem("The file has more than 60 categories.")
-        options = [None, *(c["id"] for c in criteria)]
-        labels = {None: "Not assigned", **{c["id"]: c["label"] for c in criteria}}
+        # Conduct-based criteria have no revenue limit.
+        eligible = [c for c in criteria if rules.uses_revenue(c)]
+        options = [None, *(c["id"] for c in eligible)]
+        labels = {None: "Not assigned", **{c["id"]: c["label"] for c in eligible}}
         st.markdown("**Category assignment**")
         chosen = {}
         for i, name in enumerate(names):
             left, right = st.columns([1.2, 1], vertical_alignment="center")
             left.text(name)
             chosen[name] = right.selectbox(
-                f"Criterion {i + 1}", options, index=options.index(providers.guess_criterion(name, criteria)),
+                f"Criterion {i + 1}", options, index=options.index(providers.guess_criterion(name, eligible)),
                 format_func=labels.get, label_visibility="collapsed", key=f"category-{version}-{file.file_id}-{i}")
-        plan = providers.plan_figures(table, holdings, criteria, chosen, scores,
+        plan = providers.plan_figures(table, holdings, eligible, chosen, scores,
                                       PROVIDERS.get(provider_id, ""))
     except importers.ImportProblem as e:
         st.error(str(e))

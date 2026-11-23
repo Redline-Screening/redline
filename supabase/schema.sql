@@ -34,15 +34,17 @@ create table if not exists public.criteria (
   id                uuid primary key default gen_random_uuid(),
   user_id           uuid not null default auth.uid() references auth.users (id) on delete cascade,
   key               text,
+  type              text not null default 'both' check (type in ('revenue', 'conduct', 'both')),
   label             text not null check (label <> ''),
   description       text,
-  threshold         numeric not null default 0 check (threshold between 0 and 100),
+  threshold         numeric default 0 check (threshold between 0 and 100),  -- null for conduct-based
   watch_at          numeric not null default 50 check (watch_at between 0 and 100),
   controversy_limit text not null default 'high' check (controversy_limit in ('medium', 'high', 'severe')),
   keywords          text[] not null default '{}',
   active            boolean not null default true,
   sort              int not null default 0,
   created_at        timestamptz not null default now(),
+  constraint criteria_threshold_by_type check ((type = 'conduct') = (threshold is null)),
   unique (user_id, key),
   unique (id, user_id)
 );

@@ -32,8 +32,6 @@ def test_rules(score, state, reasons):
 def test_limits_are_respected():
     assert r.evaluate({"exposure": 5}, {**C, "threshold": 5})["state"] == "clear"
     assert r.evaluate({"exposure": 5.1}, {**C, "threshold": 5})["state"] == "breach"
-    assert r.evaluate({"controversy": con("medium")}, {**C, "controversy_limit": "medium"})["state"] == "breach"
-    assert r.evaluate({"controversy": con("high")}, {**C, "controversy_limit": "severe"})["state"] == "watch"
     assert r.evaluate({"exposure": 0, "likelihood": 0}, {**C, "watch_at": 0})["state"] == "watch"
 
 
@@ -56,3 +54,19 @@ def test_overview_ignores_prospects_and_inactive_criteria():
     assert o["summary"]["na"] == {"count": 1, "weight": 5}
     assert (o["complete"], o["held"], len(o["flagged"])) == (1, 2, 1)
     assert o["by_criterion"][0]["weight"] == 10
+
+
+@pytest.mark.parametrize("kind,limit,level,state", [
+    ("revenue", "severe", "severe", "breach"), ("revenue", "severe", "high", "watch"), ("revenue", "severe", "medium", "watch"),
+    ("both", "high", "high", "breach"), ("both", "medium", "medium", "watch"),
+    ("conduct", "medium", "medium", "breach"), ("conduct", "high", "medium", "watch"),
+    ("conduct", "severe", "high", "watch"), ("conduct", "high", "low", "clear"),
+])
+def test_incident_levels_by_type(kind, limit, level, state):
+    c = {**C, "type": kind, "controversy_limit": limit, "threshold": None if kind == "conduct" else 0}
+    assert r.evaluate({"controversy": con(level)}, c)["state"] == state
+
+
+def test_conduct_ignores_revenue():
+    c = {**C, "type": "conduct", "threshold": None}
+    assert r.evaluate({"exposure": 90}, c)["state"] == "na"

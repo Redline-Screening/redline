@@ -1,5 +1,7 @@
 """Breach, watch and clear rules. No Streamlit import."""
 
+from redline.constants import FIXED_LIMITS
+
 LEVELS = ("none", "low", "medium", "high", "severe")
 LABELS = {"breach": "Breach", "watch": "Watch", "clear": "Clear", "partial": "Partly screened", "na": "Not screened"}
 
@@ -12,17 +14,29 @@ def controversy_level(score):
     return ((score or {}).get("controversy") or {}).get("level")
 
 
+def breach_level(criterion) -> str:
+    """Incident severity that counts as a breach."""
+    kind = criterion.get("type") or "both"
+    return FIXED_LIMITS.get(kind) or criterion.get("controversy_limit") or "high"
+
+
+def uses_revenue(criterion) -> bool:
+    return criterion.get("type") != "conduct"
+
+
 def evaluate(score, criterion) -> dict:
     """Status of one company for one criterion: {state, reasons}."""
     score = score or {}
     exposure, likelihood, level = score.get("exposure"), score.get("likelihood"), controversy_level(score)
+    if not uses_revenue(criterion):
+        exposure = None
     threshold = criterion.get("threshold") or 0
     watch_at = 50 if criterion.get("watch_at") is None else criterion["watch_at"]
 
     reasons = []
     if exposure is not None and exposure > threshold:
         reasons.append("Revenue")
-    if _rank(level) >= _rank(criterion.get("controversy_limit") or "high"):
+    if _rank(level) >= _rank(breach_level(criterion)):
         reasons.append("Controversy")
     if reasons:
         return {"state": "breach", "reasons": reasons}

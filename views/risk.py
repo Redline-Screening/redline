@@ -27,7 +27,8 @@ with st.container(border=True, key="panel-company"):
     st.dataframe(
         ui.status_style(pd.DataFrame([
             {"Criterion": r["criterion"]["label"], "Status": rules.LABELS[r["state"]],
-             "Revenue %": (r["score"] or {}).get("exposure"), "Limit %": r["criterion"]["threshold"],
+             "Revenue %": (r["score"] or {}).get("exposure") if rules.uses_revenue(r["criterion"]) else None,
+             "Limit %": r["criterion"]["threshold"],
              "Likelihood": (r["score"] or {}).get("likelihood"),
              "Controversy": (rules.controversy_level(r["score"]) or "").capitalize(),
              "Source": (r["score"] or {}).get("source"), "Date": (r["score"] or {}).get("exposure_date")}
@@ -60,26 +61,31 @@ with st.container(border=True, key="panel-analyst"):
     criteria = {c["id"]: c for c in active}
     cid = st.selectbox("Criterion", list(criteria), format_func=lambda i: criteria[i]["label"])
     score = scores.get((holding["id"], cid)) or {}
-    if score.get("exposure_kind") == "provider":
+    revenue = rules.uses_revenue(criteria[cid])
+    if revenue and score.get("exposure_kind") == "provider":
         st.warning("Saving replaces the provider figure with an analyst figure.")
     with st.form(f"analyst-{holding['id']}-{cid}", border=False):
         a, b = st.columns(2)
         number = lambda v: None if v is None else float(v)  # noqa: E731
-        exposure = a.number_input("Revenue exposure %", 0.0, 100.0, number(score.get("exposure")), 0.1)
-        likelihood = b.number_input("Likelihood of increase (0–100)", 0.0, 100.0, number(score.get("likelihood")), 1.0)
+        exposure = a.number_input("Revenue exposure %", 0.0, 100.0, number(score.get("exposure")), 0.1) if revenue else None
+        likelihood = (b if revenue else a).number_input("Likelihood of increase (0–100)", 0.0, 100.0, number(score.get("likelihood")), 1.0)
         note = st.text_area("Note", value=score.get("rationale") or "", max_chars=1000)
         submitted = st.form_submit_button("Save assessment", type="primary")
     if submitted:
-        if exposure is None:
+        if revenue and exposure is None:
             st.error("Enter a revenue exposure.")
+        elif not revenue and likelihood is None:
+            st.error("Enter a likelihood.")
         else:
+            record = {"holding_id": holding["id"], "criterion_id": cid, "likelihood": likelihood,
+                      "rationale": note.strip() or None}
+            if revenue:
+                record |= {"exposure": exposure, "exposure_kind": "analyst", "source": "Analyst", "basis": None,
+                           "exposure_date": date.today().isoformat(), "confidence": None, "signals": []}
+            elif not score:
+                record["source"] = "Analyst"
             try:
-                db.save_score({
-                    "holding_id": holding["id"], "criterion_id": cid, "exposure": exposure,
-                    "exposure_kind": "analyst", "source": "Analyst", "basis": None,
-                    "exposure_date": date.today().isoformat(), "likelihood": likelihood,
-                    "confidence": None, "rationale": note.strip() or None, "signals": [],
-                })
+                db.save_score(record)
             except db.DataError as e:
                 st.error(str(e))
             else:

@@ -3,9 +3,9 @@ import streamlit as st
 
 from redline import criteria as rules
 from redline import db, ui
-from redline.constants import CONTROVERSY_LIMITS, TEMPLATES
+from redline.constants import CONTROVERSY_LIMITS, FIXED_LIMITS, TEMPLATES, TYPES
 
-ui.page_header("Exclusion Criteria", "Revenue limits, controversy levels and watch levels.")
+ui.page_header("Exclusion Criteria", "Revenue limits, incident breach levels and watch levels.")
 ui.show_notice()
 
 state = st.session_state
@@ -45,28 +45,30 @@ def table_panel() -> None:
     frame["watch_at"] = pd.to_numeric(frame["watch_at"]).astype(float)
     frame["keywords"] = [", ".join(c.get("keywords") or []) for c in items]
     frame["description"] = frame["description"].astype("string")
+    frame["type"] = frame["type"].fillna("both")
     frame["remove"] = False
     edited = st.data_editor(
         frame,
         hide_index=True,
         placeholder="",
         key=f"criteria-table-{version}",
-        column_order=["active", "label", "threshold", "controversy_limit", "watch_at", "remove", "description", "keywords"],
+        column_order=["active", "label", "type", "threshold", "controversy_limit", "watch_at", "remove", "description", "keywords"],
         column_config={
             "active": st.column_config.CheckboxColumn("Active", width="small"),
             "label": st.column_config.TextColumn("Criterion", required=True, width="medium"),
+            "type": st.column_config.SelectboxColumn("Type", options=list(TYPES), format_func=TYPES.get, required=True, width=125),
             "threshold": st.column_config.NumberColumn(
-                "Revenue limit %", min_value=0, max_value=100, required=True, format="%.1f",
-                help="Maximum share of revenue. Any share above the limit is a breach."),
+                "Revenue limit %", min_value=0, max_value=100, format="%.1f",
+                help="Any revenue share above the limit is a breach. Not used for conduct-based criteria."),
             "controversy_limit": st.column_config.SelectboxColumn(
-                "Controversy breach", options=list(CONTROVERSY_LIMITS), format_func=CONTROVERSY_LIMITS.get,
-                required=True, help="Controversy level that counts as a breach."),
+                "Incident breach level", options=list(CONTROVERSY_LIMITS), format_func=CONTROVERSY_LIMITS.get,
+                required=True, help="Revenue-based: severe. Both: high or worse. Conduct-based: own level."),
             "watch_at": st.column_config.NumberColumn(
                 "Watch level", min_value=0, max_value=100, required=True, format="%.0f",
                 help="Likelihood of rising exposure (0–100) that places a company on watch."),
             "description": st.column_config.TextColumn("Description", width="medium"),
             "keywords": st.column_config.TextColumn("Keywords", width="medium", help="Separated by commas."),
-            "remove": st.column_config.CheckboxColumn("Remove", width="small"),
+            "remove": st.column_config.CheckboxColumn("Remove", width=90),
         },
     )
     rows = edited.astype(object).where(edited.notna(), None).to_dict("records")
@@ -93,12 +95,12 @@ def template_panel() -> None:
     if keys:
         st.dataframe(
             pd.DataFrame([
-                {"Criterion": t["label"], "Revenue limit %": t["threshold"],
-                 "Controversy breach": CONTROVERSY_LIMITS[t["controversy_limit"]],
+                {"Criterion": t["label"], "Type": TYPES[t["type"]], "Revenue limit %": t["threshold"],
+                 "Incident breach level": CONTROVERSY_LIMITS[t["controversy_limit"]],
                  "Watch level": t["watch_at"], "Description": t["description"]}
                 for k, t in open_templates.items() if k in keys
-            ]),
-            hide_index=True,
+            ]).astype({"Revenue limit %": float}),
+            hide_index=True, placeholder="",
         )
     if st.button("Add criteria", type="secondary" if items else "primary", disabled=not keys):
         new = rules.from_templates(keys, items)
@@ -106,18 +108,27 @@ def template_panel() -> None:
 
 
 def custom_panel() -> None:
-    with st.form(f"custom-{version}", border=False):
-        label = st.text_input("Criterion", max_chars=80)
-        description = st.text_area("Description", max_chars=500, help="Activities that count towards the criterion.")
-        a, b, c = st.columns(3)
-        threshold = a.number_input("Revenue limit %", 0.0, 100.0, 0.0, 0.5)
-        limit = b.selectbox("Controversy breach", list(CONTROVERSY_LIMITS), index=1, format_func=CONTROVERSY_LIMITS.get)
-        watch = c.number_input("Watch level", 0, 100, 50, 5)
-        keywords = st.text_input("Keywords", help="Separated by commas. Used to match provider categories and news.")
-        if not st.form_submit_button("Add criterion"):
-            return
+    key = lambda name: f"custom-{name}-{version}"  # noqa: E731
+    label = st.text_input("Criterion", max_chars=80, key=key("label"))
+    kind = st.radio("Type", list(TYPES), index=2, format_func=TYPES.get, horizontal=True, key=key("type"),
+                    help="Conduct-based criteria have no revenue limit and breach through incidents only.")
+    description = st.text_area("Description", max_chars=500, key=key("description"),
+                               help="Activities or conduct that count towards the criterion.")
+    a, b = st.columns(2)
+    threshold, limit = None, FIXED_LIMITS.get(kind)
+    if kind == "conduct":
+        limit = a.selectbox("Incident breach level", list(CONTROVERSY_LIMITS), index=1,
+                            format_func=CONTROVERSY_LIMITS.get, key=key("limit"))
+    else:
+        threshold = a.number_input("Revenue limit %", 0.0, 100.0, 0.0, 0.5, key=key("threshold"))
+        st.caption(f"Incident breach level: {CONTROVERSY_LIMITS[limit]}.")
+    watch = b.number_input("Watch level", 0, 100, 50, 5, key=key("watch"))
+    keywords = st.text_input("Keywords", help="Separated by commas. Used to match provider categories and news.",
+                             key=key("keywords"))
+    if not st.button("Add criterion"):
+        return
     try:
-        new = rules.custom(label, description, threshold, limit, watch, keywords, items)
+        new = rules.custom(kind, label, description, threshold, limit, watch, keywords, items)
     except rules.CriterionProblem as e:
         st.error(str(e))
     else:

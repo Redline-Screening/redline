@@ -68,3 +68,17 @@ def test_only_the_chosen_score_is_deleted(make_app, monkeypatch):
     monkeypatch.setattr(auth, "client", lambda: client)
     db.delete_score("1", "c1")
     assert rows == [{"holding_id": "1", "criterion_id": "c2"}, {"holding_id": "2", "criterion_id": "c1"}]
+
+
+def test_conduct_criterion(make_app):
+    conduct = {**CRIT, "type": "conduct", "threshold": None}
+    score = {"holding_id": "1", "criterion_id": "c1", "controversy": {"level": "high"}}
+    app = make_app(holdings=[H("1", "Meta", 6)], criteria=[conduct], scores=[score])
+    assert not app.exception and app.metric[0].value == "6.00%"
+    app.switch_page("views/risk.py").run()
+    assert not app.exception
+    assert [n.label for n in app.number_input] == ["Likelihood of increase (0\u2013100)"]
+    app.number_input[0].set_value(40.0)
+    next(b for b in app.button if b.label == "Save assessment").click().run()
+    saved = app.session_state["_supabase"].tables["scores"][0]
+    assert saved["likelihood"] == 40 and "exposure" not in saved and saved["controversy"] == {"level": "high"}

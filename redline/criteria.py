@@ -2,9 +2,9 @@
 import re
 import uuid
 
-from redline.constants import CONTROVERSY_LIMITS, TEMPLATES
+from redline.constants import CONTROVERSY_LIMITS, FIXED_LIMITS, TEMPLATES, TYPES
 
-FIELDS = ("key", "label", "description", "threshold", "watch_at", "controversy_limit", "keywords", "active", "sort")
+FIELDS = ("key", "type", "label", "description", "threshold", "watch_at", "controversy_limit", "keywords", "active", "sort")
 
 
 class CriterionProblem(Exception):
@@ -34,7 +34,16 @@ def from_templates(keys, existing) -> list[dict]:
 def _validate(record) -> dict:
     if not record["label"]:
         raise CriterionProblem("A criterion name is required.")
-    for field, name in (("threshold", "Revenue limit"), ("watch_at", "Watch level")):
+    if record["type"] not in TYPES:
+        raise CriterionProblem("Select a criterion type.")
+    if record["type"] == "conduct":
+        record["threshold"] = None
+    else:
+        record["controversy_limit"] = FIXED_LIMITS[record["type"]]
+    checks = [("watch_at", "Watch level")]
+    if record["type"] != "conduct":
+        checks.append(("threshold", "Revenue limit"))
+    for field, name in checks:
         value = record[field]
         if value is None or value != value or not 0 <= value <= 100:
             raise CriterionProblem(f"{name} must be between 0 and 100.")
@@ -43,7 +52,7 @@ def _validate(record) -> dict:
     return record
 
 
-def custom(label, description, threshold, controversy_limit, watch_at, keywords, existing) -> dict:
+def custom(kind, label, description, threshold, controversy_limit, watch_at, keywords, existing) -> dict:
     label = label.strip()
     key = slug(label)
     if label and not key:
@@ -51,7 +60,7 @@ def custom(label, description, threshold, controversy_limit, watch_at, keywords,
     if any(c.get("key") == key or c["label"].strip().lower() == label.lower() for c in existing):
         raise CriterionProblem("A criterion with this name already exists.")
     return _validate({
-        "id": str(uuid.uuid4()), "key": key, "label": label, "description": description.strip() or None,
+        "id": str(uuid.uuid4()), "key": key, "type": kind, "label": label, "description": description.strip() or None,
         "threshold": threshold, "watch_at": watch_at, "controversy_limit": controversy_limit,
         "keywords": split_keywords(keywords), "active": True, "sort": _next_sort(existing),
     })
@@ -68,17 +77,21 @@ def diff_edits(before: list[dict], after: list[dict]) -> tuple[list[dict], list[
             continue
         record = {f: original.get(f) for f in FIELDS}
         record.update(
+            type=row["type"],
             label=str(row["label"] or "").strip(),
             description=str(row["description"] or "").strip() or None,
             threshold=row["threshold"], watch_at=row["watch_at"],
             controversy_limit=row["controversy_limit"],
             keywords=split_keywords(row["keywords"]), active=bool(row["active"]),
         )
+        fixed = FIXED_LIMITS.get(record["type"])
+        if fixed and row["controversy_limit"] not in (original["controversy_limit"], fixed):
+            raise CriterionProblem("The incident breach level can be changed only for conduct-based criteria.")
         _validate(record)
         if record["label"].lower() in labels:
             raise CriterionProblem("Two criteria have the same name.")
         labels.add(record["label"].lower())
-        same = dict(original, description=original.get("description") or None,
+        same = dict(original, type=original.get("type") or "both", description=original.get("description") or None,
                     keywords=split_keywords(",".join(original.get("keywords") or [])))
         if any(record[f] != same.get(f) for f in FIELDS):
             changed.append({"id": row["id"], **record})

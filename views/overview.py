@@ -61,7 +61,7 @@ with st.container(border=True, key="panel-flagged"):
             ui.status_style(pd.DataFrame([
                 {"Company": r["holding"]["name"], "Weight %": r["holding"]["weight"],
                  "Criterion": r["criterion"]["label"], "Status": rules.LABELS[r["state"]],
-                 "Reason": ", ".join(r["reasons"]), "Revenue %": r["score"].get("exposure"),
+                 "Reason": ", ".join(r["reasons"]), "Revenue %": r["score"].get("exposure") if rules.uses_revenue(r["criterion"]) else None,
                  "Limit %": r["criterion"]["threshold"], "Likelihood": r["score"].get("likelihood"),
                  "Controversy": (rules.controversy_level(r["score"]) or "").capitalize(),
                  "Source": r["score"].get("source")}
@@ -84,12 +84,12 @@ with st.container(border=True, key="panel-by-criterion"):
     st.subheader("Fund Weight in Breach by Criterion", anchor=False)
     st.dataframe(
         pd.DataFrame([
-            {"Criterion": r["criterion"]["label"], "Limit %": float(r["criterion"]["threshold"]),
+            {"Criterion": r["criterion"]["label"], "Limit %": r["criterion"]["threshold"],
              "Weight in breach %": float(r["weight"]), "In breach": r["breach"], "On watch": r["watch"],
              "Not screened": r["na"]}
             for r in data["by_criterion"]
-        ]),
-        hide_index=True,
+        ]).astype({"Limit %": float}),
+        hide_index=True, placeholder="",
         column_config={
             "Limit %": st.column_config.NumberColumn(format="%.1f"),
             "Weight in breach %": st.column_config.ProgressColumn(
