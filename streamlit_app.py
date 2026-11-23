@@ -1,7 +1,7 @@
 """Redline: entry point, sign-in gate and navigation."""
 import streamlit as st
 
-from redline import auth, ui
+from redline import auth, db, ui
 
 st.set_page_config(page_title="Redline", layout="wide")
 ui.apply_style()
@@ -19,6 +19,12 @@ except auth.SignInError as e:
 
 if user is None:
     st.navigation([st.Page("views/login.py", title="Sign In")], position="hidden").run()
+    st.stop()
+
+try:
+    demo = db.is_read_only()
+except db.DataError as e:
+    st.error(str(e))
     st.stop()
 
 page = st.navigation(
@@ -44,6 +50,10 @@ if run and page.url_path != "screening":
     run["active"] = False
 
 with st.sidebar:
-    st.text(user.email or "")
+    if demo:
+        st.text("Demo account")
+        st.caption("Read-only. Prepared results; AI checks are not available.")
+    else:
+        st.text(user.email or "")
     st.button("Sign out", on_click=auth.sign_out, key="sign-out")
 page.run()

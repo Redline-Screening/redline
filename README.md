@@ -19,6 +19,10 @@ Tests: `.venv/bin/python -m pytest`
 2. Under **Authentication → Sign In / Providers → Email**, switch off **Confirm email**.
 3. With two test accounts, run `.venv/bin/python tests/check_rls.py`. It confirms that neither account can reach the other's data.
 
+## Demo account
+
+Create an account, run `supabase/migrations/005_read_only_accounts.sql`, then `supabase/demo_copy.sql` with the two addresses filled in. Set `DEMO_EMAIL` and `DEMO_PASSWORD` in the secrets. `.venv/bin/python tests/check_demo.py` confirms that the account cannot change anything.
+
 ## Deployment (Streamlit Community Cloud)
 
 1. Sign in at share.streamlit.io with GitHub and grant access to the repository's organization.

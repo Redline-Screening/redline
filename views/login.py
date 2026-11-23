@@ -33,4 +33,15 @@ with middle:
                     st.rerun()
                 st.info("Confirm the email address, then sign in.")
 
+    if auth.demo_available():
+        with st.container(border=True, key="panel-demo"):
+            st.write("Prepared screening results, without an account. Read-only.")
+            if st.button("View demo", width="stretch"):
+                try:
+                    auth.sign_in_demo()
+                except auth.SignInError as e:
+                    st.error(str(e))
+                else:
+                    st.rerun()
+
     st.caption(AI_NOTE)

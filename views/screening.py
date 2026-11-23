@@ -107,6 +107,8 @@ def setup() -> None:
     run_now = jobs[:remaining]
     if not jobs:
         st.write("No checks to run with this selection.")
+    elif db.is_read_only():
+        st.info("AI checks are not available in the demo account.")
     elif not remaining:
         st.info(service.BUDGET_MESSAGE if not int(status["budget"]) else service.LIMIT_MESSAGE)
     elif len(jobs) > remaining:
@@ -114,9 +116,9 @@ def setup() -> None:
                  "largest weights first.")
     else:
         st.write(f"This will run {len(jobs)} {'check' if len(jobs) == 1 else 'checks'}. {remaining} remaining today.")
-    if not key:
+    if not key and not db.is_read_only():
         st.warning("AI screening is not configured.")
-    if st.button("Run screening", type="primary", disabled=not run_now or not key):
+    if st.button("Run screening", type="primary", disabled=not run_now or not key or db.is_read_only()):
         state.screening_run = runner.new_run(run_now, web=web, estimate=estimate)
         st.rerun()
 

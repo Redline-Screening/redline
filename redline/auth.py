@@ -68,6 +68,17 @@ def sign_in(email: str, password: str) -> None:
         raise SignInError(_message(e)) from e
 
 
+def demo_available() -> bool:
+    return bool(st.secrets.get("DEMO_EMAIL") and st.secrets.get("DEMO_PASSWORD"))
+
+
+def sign_in_demo() -> None:
+    try:
+        sign_in(st.secrets["DEMO_EMAIL"], st.secrets["DEMO_PASSWORD"])
+    except SignInError as e:
+        raise SignInError("The demo account is currently unavailable.") from e
+
+
 def sign_up(email: str, password: str, code: str) -> bool:
     """Create an account. Returns True when the user is signed in directly."""
     if not email.strip() or not password:
