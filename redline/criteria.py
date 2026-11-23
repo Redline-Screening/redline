@@ -2,7 +2,7 @@
 import re
 import uuid
 
-from redline.constants import CONTROVERSY_LIMITS, FIXED_LIMITS, TEMPLATES, TYPES
+from redline.constants import CONTROVERSY_LIMITS, TEMPLATES, TYPES, fixed_limit
 
 FIELDS = ("key", "type", "label", "description", "threshold", "watch_at", "controversy_limit", "keywords", "active", "sort")
 
@@ -39,7 +39,7 @@ def _validate(record) -> dict:
     if record["type"] == "conduct":
         record["threshold"] = None
     else:
-        record["controversy_limit"] = FIXED_LIMITS[record["type"]]
+        record["controversy_limit"] = fixed_limit(record["type"], record["key"])
     checks = [("watch_at", "Watch level")]
     if record["type"] != "conduct":
         checks.append(("threshold", "Revenue limit"))
@@ -84,7 +84,7 @@ def diff_edits(before: list[dict], after: list[dict]) -> tuple[list[dict], list[
             controversy_limit=row["controversy_limit"],
             keywords=split_keywords(row["keywords"]), active=bool(row["active"]),
         )
-        fixed = FIXED_LIMITS.get(record["type"])
+        fixed = fixed_limit(record["type"], record["key"])
         if fixed and row["controversy_limit"] not in (original["controversy_limit"], fixed):
             raise CriterionProblem("The incident breach level can be changed only for conduct-based criteria.")
         _validate(record)

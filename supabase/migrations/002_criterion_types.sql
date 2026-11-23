@@ -10,7 +10,8 @@ alter table public.criteria add constraint criteria_type_check check (type in ('
 alter table public.criteria alter column threshold drop not null;
 
 -- The breach level is fixed for these types.
-update public.criteria set controversy_limit = 'high' where type = 'both' and controversy_limit <> 'high';
+update public.criteria set controversy_limit = 'high' where type = 'both' and controversy_limit <> 'high'
+  and key is distinct from 'controversial-weapons';
 update public.criteria set controversy_limit = 'severe' where type = 'revenue' and controversy_limit <> 'severe';
 
 alter table public.criteria drop constraint if exists criteria_threshold_by_type;

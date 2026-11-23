@@ -3,7 +3,7 @@ import streamlit as st
 
 from redline import criteria as rules
 from redline import db, ui
-from redline.constants import CONTROVERSY_LIMITS, FIXED_LIMITS, TEMPLATES, TYPES
+from redline.constants import CONTROVERSY_LIMITS, TEMPLATES, TYPES, fixed_limit
 
 ui.page_header("Exclusion Criteria", "Revenue limits, incident breach levels and watch levels.")
 ui.show_notice()
@@ -62,7 +62,7 @@ def table_panel() -> None:
                 help="Any revenue share above the limit is a breach. Not used for conduct-based criteria."),
             "controversy_limit": st.column_config.SelectboxColumn(
                 "Incident breach level", options=list(CONTROVERSY_LIMITS), format_func=CONTROVERSY_LIMITS.get,
-                required=True, help="Revenue-based: severe. Both: high or worse. Conduct-based: own level."),
+                required=True, help="Revenue-based: severe. Both: high or worse (controversial weapons: medium or worse). Conduct-based: own level."),
             "watch_at": st.column_config.NumberColumn(
                 "Watch level", min_value=0, max_value=100, required=True, format="%.0f",
                 help="Likelihood of rising exposure (0–100) that places a company on watch."),
@@ -115,7 +115,7 @@ def custom_panel() -> None:
     description = st.text_area("Description", max_chars=500, key=key("description"),
                                help="Activities or conduct that count towards the criterion.")
     a, b = st.columns(2)
-    threshold, limit = None, FIXED_LIMITS.get(kind)
+    threshold, limit = None, fixed_limit(kind)
     if kind == "conduct":
         limit = a.selectbox("Incident breach level", list(CONTROVERSY_LIMITS), index=1,
                             format_func=CONTROVERSY_LIMITS.get, key=key("limit"))

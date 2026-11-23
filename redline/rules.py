@@ -1,6 +1,6 @@
 """Breach, watch and clear rules. No Streamlit import."""
 
-from redline.constants import FIXED_LIMITS
+from redline.constants import fixed_limit
 
 LEVELS = ("none", "low", "medium", "high", "severe")
 LABELS = {"breach": "Breach", "watch": "Watch", "clear": "Clear", "partial": "Partly screened", "na": "Not screened"}
@@ -16,8 +16,7 @@ def controversy_level(score):
 
 def breach_level(criterion) -> str:
     """Incident severity that counts as a breach."""
-    kind = criterion.get("type") or "both"
-    return FIXED_LIMITS.get(kind) or criterion.get("controversy_limit") or "high"
+    return fixed_limit(criterion.get("type") or "both", criterion.get("key")) or criterion.get("controversy_limit") or "high"
 
 
 def uses_revenue(criterion) -> bool:

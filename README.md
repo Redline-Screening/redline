@@ -15,7 +15,7 @@ Tests: `.venv/bin/python -m pytest`
 
 ## Database (Supabase)
 
-1. Create a project, open **SQL Editor**, paste `supabase/schema.sql` and run it.
+1. Create a project, open **SQL Editor**, run `supabase/schema.sql`, then the files in `supabase/migrations/` in order.
 2. Under **Authentication → Sign In / Providers → Email**, switch off **Confirm email**.
 3. With two test accounts, run `.venv/bin/python tests/check_rls.py`. It confirms that neither account can reach the other's data.
 

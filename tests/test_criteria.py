@@ -1,7 +1,7 @@
 import pytest
 
 from redline import criteria as cr
-from redline.constants import TEMPLATES
+from redline.constants import TEMPLATES, fixed_limit
 
 
 def edit(c, **changes):
@@ -59,7 +59,7 @@ def test_page(make_app):
 def test_types_set_limits():
     for t in TEMPLATES:
         assert (t["threshold"] is None) == (t["type"] == "conduct")
-        assert t["controversy_limit"] == {"revenue": "severe", "both": "high"}.get(t["type"], t["controversy_limit"])
+        assert t["controversy_limit"] == (fixed_limit(t["type"], t["key"]) or t["controversy_limit"])
     c = cr.custom("conduct", "Bullying", "", 5, "medium", 50, "", [])
     assert (c["threshold"], c["controversy_limit"]) == (None, "medium")
     assert cr.custom("revenue", "Fur", "", 5, "medium", 50, "", [])["controversy_limit"] == "severe"
@@ -90,3 +90,13 @@ def test_conduct_form_has_no_revenue_limit(make_app):
     assert not app.exception
     row = app.session_state["_supabase"].tables["criteria"][0]
     assert (row["type"], row["threshold"]) == ("conduct", None)
+
+
+def test_controversial_weapons_exception():
+    from redline.rules import evaluate
+    c = cr.from_templates(["controversial-weapons"], [])[0]
+    assert c["controversy_limit"] == "medium"
+    assert evaluate({"controversy": {"level": "medium"}}, {**c, "controversy_limit": "high"})["state"] == "breach"
+    changed, _ = cr.diff_edits([c], [edit(c, type="revenue")])
+    assert changed[0]["controversy_limit"] == "severe"
+    assert fixed_limit("both", "military") == "high"

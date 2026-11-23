@@ -64,7 +64,15 @@ try:
     check("B cannot score A's company", refused(lambda: b.table("scores").insert({"holding_id": hold, "criterion_id": b_crit}).execute()))
     check("AI cannot replace a provider figure", refused(lambda: a.table("scores").update(
         {"exposure": 1, "exposure_kind": "ai_web"}).eq("holding_id", hold).execute()))
-    check("B cannot edit usage counts", refused(lambda: b.table("ai_usage").insert({"user_id": uid_b, "checks": 0}).execute()))
+    f = a.table("findings").insert({"holding_id": hold, "criterion_id": crit, "title": "RLS check", "summary": "x",
+                                    "severity": "low", "sources": [{"url": "https://example.com", "title": "x"}]}).execute().data[0]["id"]
+    check("B cannot read A's findings", b.table("findings").select("*").eq("id", f).execute().data == [])
+    check("B cannot delete A's findings", b.table("findings").delete().eq("id", f).execute().data == [])
+    check("B cannot link an alert to A's finding", refused(lambda: b.table("alerts").insert({"title": "x", "finding_id": f}).execute()))
+    check("B cannot record AI checks", refused(lambda: b.table("ai_checks").insert({"user_id": uid_b, "kind": "manual", "model": "x"}).execute()))
+    check("B cannot raise the daily limit", refused(lambda: b.table("accounts").insert({"user_id": uid_b, "daily_limit": 999}).execute()))
+    check("Signed out cannot reserve AI checks", refused(lambda: anon.rpc("reserve_ai_check", {"p_model": "x"}).execute()))
+    check("B cannot change the budget", refused(lambda: b.table("ai_budget").update({"total": 999}).eq("kind", "manual").execute()))
 finally:
     a.table("holdings").delete().eq("id", hold).execute()
     a.table("criteria").delete().eq("id", crit).execute()

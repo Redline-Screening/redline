@@ -11,6 +11,7 @@ criteria (e.g. "0% revenue from military activity"). The app checks for breaches
 - Criterion types:
   - Revenue-based (e.g. thermal coal): BREACH if revenue > limit OR a severe incident.
   - Both (e.g. military): BREACH if revenue > limit OR a high or severe incident.
+    Exception: controversial weapons breach at medium or worse.
   - Conduct-based (e.g. child labour): no revenue limit; BREACH if an incident reaches
     the criterion's own breach level (medium, high or severe).
   - WATCH (all types): medium or worse incident below the breach level, or

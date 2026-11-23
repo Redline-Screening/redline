@@ -7,6 +7,17 @@ TYPES = {"revenue": "Revenue-based", "conduct": "Conduct-based", "both": "Both"}
 # Breach level fixed by type. Conduct-based criteria have their own level.
 FIXED_LIMITS = {"revenue": "severe", "both": "high"}
 
+# Stricter level for single standard exclusions, while their type is Both.
+LIMIT_EXCEPTIONS = {"controversial-weapons": "medium"}
+
+
+def fixed_limit(kind, key=None):
+    """Incident breach level set by the rules, or None for conduct-based criteria."""
+    if kind == "both" and key in LIMIT_EXCEPTIONS:
+        return LIMIT_EXCEPTIONS[key]
+    return FIXED_LIMITS.get(kind)
+
+
 # Common exclusions with standard limits.
 TEMPLATES = [
     {
@@ -24,7 +35,7 @@ TEMPLATES = [
     {
         "key": "controversial-weapons", "type": "both", "label": "Controversial weapons",
         "description": "Cluster munitions, anti-personnel mines, nuclear, chemical and biological weapons, including key components.",
-        "threshold": 0, "watch_at": 30, "controversy_limit": "high",
+        "threshold": 0, "watch_at": 30, "controversy_limit": "medium",
         "keywords": ["cluster", "landmine", "nuclear weapon", "chemical weapon", "biological", "controversial weapon"],
     },
     {
@@ -113,3 +124,14 @@ PROVIDERS = {
     "sustainalytics": "Morningstar Sustainalytics",
     "other": "Other provider",
 }
+
+FINDING_CATEGORIES = {
+    "scandal": "Scandal", "court": "Court case", "ngo": "NGO report", "supply_chain": "Supply chain",
+    "contract": "Contract", "investment": "Investment", "subsidiary": "Subsidiary", "financing": "Financing",
+    "other": "Other",
+}
+
+MODEL_MANUAL = "claude-sonnet-5-5"
+MODEL_MONITOR = "claude-haiku-5-5"
+SEARCHES_MANUAL = 4
+SEARCHES_MONITOR = 2
