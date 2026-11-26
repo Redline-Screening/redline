@@ -106,7 +106,8 @@ def test_page(make_app):
     assert tables["workspaces"][0]["mode"] == "both"
     assert set(tables["workspaces"][0]["providers"]) == {"other", "reprisk"}
     app.switch_page("views/overview.py").run()
-    assert [m.value for m in app.metric] == ["8.00%", "0.00%", "1", "3 of 10"]
+    assert [m.value for m in app.metric] == ["8.00%", "0.00%", "0", "3 of 10"]
     app.switch_page("views/alerts.py").run()
     assert not app.exception
-    assert any("Logitech International" in c.value and "RepRisk" in c.value for c in app.caption)
+    assert "Logitech International" in [m.value for m in app.markdown if m.value.startswith("**")][0]
+    assert "Sample incident for import testing" in [t.value for t in app.text]

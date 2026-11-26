@@ -58,7 +58,8 @@ def save_result(sb, company, result) -> None:
                                       on_conflict="holding_id,criterion_id").execute()
 
 
-def run_check(sb, client, company, criteria, *, web=True, estimate=True, model=MODEL_MANUAL, max_searches=SEARCHES_MANUAL):
+def run_check(sb, client, company, criteria, *, web=True, estimate=True, model=MODEL_MANUAL, max_searches=SEARCHES_MANUAL,
+              kind="manual", since=None):
     """Screens one company against the criteria and saves the result.
 
     Raises LimitReached before anything is spent, or screening.ScreeningError.
@@ -68,7 +69,7 @@ def run_check(sb, client, company, criteria, *, web=True, estimate=True, model=M
               sb.table("scores").select("*").eq("holding_id", company["id"]).in_("criterion_id", ids).execute().data}
     findings = sb.table("findings").select("*").eq("holding_id", company["id"]).in_("criterion_id", ids).execute().data
 
-    ticket = sb.rpc("reserve_ai_check", {"p_model": model}).execute().data
+    ticket = sb.rpc("reserve_monitor_check" if kind == "monitor" else "reserve_ai_check", {"p_model": model}).execute().data
     if "id" not in ticket:
         raise LimitReached(BUDGET_MESSAGE if ticket.get("reason") == "budget" else LIMIT_MESSAGE)
 
@@ -82,14 +83,31 @@ def run_check(sb, client, company, criteria, *, web=True, estimate=True, model=M
 
     try:
         result = screening.screen(client, model=model, company=company, criteria=criteria, scores=scores,
-                                  findings=findings, web=web, max_searches=max_searches, estimate=estimate)
+                                  findings=findings, web=web, max_searches=max_searches, estimate=estimate,
+                                  since=since)
     except screening.ScreeningError as e:
         finish("failed", e.usage)
         raise
     finish("done", result.usage)
     save_result(sb, company, result)
     result.before, result.known = scores, findings
+    if kind == "monitor":
+        mark_monitored(sb, company, [c for c in criteria if c["id"] in result.scores], result)
     return result
+
+
+def mark_monitored(sb, company, criteria, result) -> None:
+    """Records the monitoring check and whether it found something new for Alerts."""
+    from datetime import date
+
+    from redline.rules import evaluate
+    for c in criteria:
+        before = evaluate(result.before.get(c["id"]), c)["state"]
+        after = evaluate({**(result.before.get(c["id"]) or {}), **result.scores.get(c["id"], {})}, c)["state"]
+        found = any(f["criterion_id"] == c["id"] for f in result.new)
+        new = after in ("breach", "watch") and (after != before or found)
+        sb.table("scores").update({"monitor_checked": date.today().isoformat(), "monitor_new": new}) \
+            .eq("holding_id", company["id"]).eq("criterion_id", c["id"]).execute()
 
 
 def refresh_summaries(sb, client, company, criteria) -> None:

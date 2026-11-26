@@ -135,6 +135,9 @@ MODEL_MANUAL = "claude-sonnet-5-5"
 MODEL_MONITOR = "claude-haiku-5-5"
 SEARCHES_MANUAL = 4
 SEARCHES_MONITOR = 2
+MONITOR_MAX_COMPANIES = 10
+MONITOR_COST = 0.03     # estimated US dollars per company and day
+MONITOR_FIRST_DAYS = 30
 
 AI_NOTE = ("AI checks are funded privately for this school project and limited per day. "
            "Contact victoria.gueissaz@student.unisg.ch for a higher limit.")

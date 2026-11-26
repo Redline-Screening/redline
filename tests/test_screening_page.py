@@ -68,10 +68,15 @@ def test_first_run(app):
 
     assert app.multiselect[0].value == ["h1", "h2", "h3"]        # the selection is kept after the run
     shown = texts(app)
-    assert "Checks completed: 2 of 3. Failed: 1. New findings: 1. New alerts: 0." in shown
-    assert [e.label for e in app.expander] == ["Results", "Findings"]
+    assert app.warning[0].value == "Checks completed: 2 of 3. Failed: 1. New findings: 1."
+    labels = [e.label for e in app.expander]
+    assert labels[0] == "Results table"
+    assert labels[1].startswith("**Palantir Technologies** · :red-badge[Military: Breach] · 1 new, 0 updated")
+    assert labels[2].startswith("**Microsoft** · :green-badge[Military: Clear] · no incidents found")
+    assert labels[3].startswith("**Amazon** · :red-badge[Check failed]")
+    assert not any(e.proto.expanded for e in app.expander)
     table = app.dataframe[0].value
-    assert list(table["Change"]) == ["Not screened → Breach", "Not screened → Clear", ""]
+    assert list(table["Change"]) == ["Not screened \u2192 Breach", "Not screened \u2192 Clear", ""]
     assert list(table["Status"]) == ["Breach", "Clear", "Failed"]
     assert table["Revenue %"][0] == 0.5
     assert table["Revenue source"][0] == "Unsourced estimate"
@@ -79,10 +84,15 @@ def test_first_run(app):
     assert "No incidents found for Microsoft / Military." in shown
     assert f"Check failed: {ERROR}" in shown
     assert any("blue-badge[New]" in m.value for m in app.markdown)
+    assert any(b.label == "Retry failed checks (1)" for b in app.button)
     links = [b.label for b in app.button if b.label.startswith("View all findings")]
     assert links == ["View all findings for Palantir Technologies", "View all findings for Microsoft", "View all findings for Amazon"]
     next(b for b in app.button if b.label == "View all findings for Palantir Technologies").click().run()
     assert app.session_state[ui.COMPANY_KEY] == "h1"
+    app.switch_page("views/screening.py").run()
+    next(b for b in app.button if b.label == "Retry failed checks (1)").click().run()
+    finish(app)
+    assert app.seen[-1] == ("h3", "Military")
 
 
 def test_inactive_and_standard_criteria(app):

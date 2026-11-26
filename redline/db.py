@@ -152,3 +152,22 @@ def refresh_summaries(pairs) -> None:
     with st.spinner("Updating status summaries"):
         for company, criterion in pairs:
             service.refresh_summaries(auth.client(), service.claude(key), company, [criterion])
+
+
+def monitor_status() -> dict:
+    return _run(auth.client().rpc("monitor_status"))
+
+
+def start_monitoring_run() -> bool:
+    if is_read_only():
+        return False
+    return bool(_run(auth.client().rpc("start_monitoring_run")))
+
+
+def set_monitored(ids: list[str], all_ids: list[str]) -> None:
+    """Monitored companies: the given ids on, all others off."""
+    off = [i for i in all_ids if i not in ids]
+    if off:
+        _write(auth.client().table("holdings").update({"monitored": False}).in_("id", off))
+    if ids:
+        _write(auth.client().table("holdings").update({"monitored": True}).in_("id", ids))

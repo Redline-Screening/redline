@@ -43,14 +43,16 @@ if not (steps[0]["done"] and steps[1]["done"]):
 
 data = rules.overview(holdings, criteria, scores)
 summary = data["summary"]
-open_alerts = [a for a in alerts if a["status"] in ("new", "escalated")]
+from redline import alerts as alert_view  # noqa: E402
+
+monitoring = alert_view.monitoring_view(holdings, criteria, scores, db.findings(), alerts)
 a, b, c, d = st.columns(4)
 a.metric("Weight in breach", f"{summary['breach']['weight']:.2f}%", border=True,
          help=f"Holdings in breach: {summary['breach']['count']}")
 b.metric("Weight on watch", f"{summary['watch']['weight']:.2f}%", border=True,
          help=f"Holdings on watch: {summary['watch']['count']}")
-c.metric("Open alerts", len(open_alerts), border=True,
-         help=f"High severity: {sum(x['severity'] == 'high' for x in open_alerts)}")
+c.metric("Monitoring: companies in breach", len(monitoring["breach"]), border=True,
+         help=f"Companies on watch: {len(monitoring['watch'])}")
 d.metric("Fully screened", f"{data['complete']} of {data['held']}", border=True,
          help="Holdings screened against every active criterion.")
 

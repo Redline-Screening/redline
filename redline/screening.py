@@ -64,6 +64,7 @@ class Result:
     updated: list = field(default_factory=list)     # known findings seen again
     alerts: list = field(default_factory=list)      # findings that raise an alert
     left_out: int = 0                               # findings naming an outlet without a link
+    missing: list = field(default_factory=list)     # criteria the answer did not cover
     before: dict = field(default_factory=dict)      # criterion id -> score before the check
     known: list = field(default_factory=list)       # findings stored before the check
     usage: Usage = field(default_factory=Usage)
@@ -451,9 +452,10 @@ def screen(client, *, model, company, criteria, scores, findings, web, max_searc
     data, urls, usage = ask(client, model=model, prompt=prompt, web=web, max_searches=max_searches)
     by_id = {c["id"]: c for c in criteria}
     items = {i["id"]: i for i in data["criteria"] if isinstance(i, dict) and i.get("id") in by_id}
-    if set(items) != set(by_id):
-        raise ScreeningError("The AI answer did not cover every criterion. Nothing was saved.", usage)
-    result = Result(usage=usage)
+    if not items:
+        raise ScreeningError("The AI answer did not cover any criterion. Nothing was saved.", usage)
+    # Criteria the answer covered are saved; the others are reported for a separate check.
+    result = Result(usage=usage, missing=[c for cid, c in by_id.items() if cid not in items])
     for cid, item in items.items():
         out = merge_score(scores.get(cid), item, by_id[cid], web=web, today=today, estimate=estimate, urls=urls)
         if web:

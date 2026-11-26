@@ -49,8 +49,10 @@ criteria (e.g. "0% revenue from military activity"). The app checks for breaches
   findings and the revenue source. Regenerated whenever the status basis changes (new check,
   dismissed finding, provider or analyst figure). Counts towards the manual budget.
 - Dates are shown as exact as known (day, month or year), as Event or Reported.
-- Alerts: every finding at medium or above creates one alert with company, criterion,
-  summary, date and sources. It reopens if the severity rises.
+- Alerts page: results of Portfolio Monitoring and provider incident imports only, in two
+  boxes (Breaches, Watch), one card per company with one line per criterion (summary,
+  number of findings) and "New" for changes in the latest monitoring run. Manual screening
+  results stay in Screening and Company Profiles.
 - Pages: Overview, Investment Universe, Exclusion Criteria, Data Sources, Screening,
   Company Profiles, Alerts. Daily monitoring runs separately.
 
@@ -66,9 +68,10 @@ criteria (e.g. "0% revenue from military activity"). The app checks for breaches
 - Limits counted in the database before each call: 15 checks per user per day, 60 per
   day across all users. Failed checks count.
 - Actual cost of each check is recorded. Total budget: $12 manual, $4 monitoring.
-- Monitoring: only issuers the user toggles on (off by default, max 5 per user), one
-  check per company covering all active criteria, max 5 checks per day across all
-  users, only new incidents since the last check.
+- Monitoring: only companies the user selects (off by default, max 10 per user), one
+  check per company covering all active criteria, max 10 checks per day across all
+  users, only new incidents since the last monitoring check (first check: last 30 days).
+  "Run now" runs the same monitoring once per day per user.
 - At a limit show "Daily AI limit reached, try again tomorrow", not an error.
 - Show the number of checks before a screening starts ("This will run 20 checks").
 - Demo account: prepared results, read-only, no AI checks.

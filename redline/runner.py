@@ -7,6 +7,7 @@ import threading
 from datetime import date, timedelta
 
 from redline import screening, service
+from redline.constants import MODEL_MONITOR, MONITOR_FIRST_DAYS, SEARCHES_MONITOR
 from redline.rules import evaluate, revenue_source, uses_revenue
 
 
@@ -26,9 +27,22 @@ def build_jobs(companies, criteria, scores, *, web, skip_days=0, today=None) -> 
     return [{"company": h, "criteria": [c]} for h in ordered for c in criteria if not recent(h, c)]
 
 
-def new_run(jobs, *, web, estimate) -> dict:
-    return {"jobs": list(jobs), "total": len(jobs), "done": 0, "findings": 0, "alerts": 0, "left_out": 0, "checks": [], "errors": [], "failures": 0,
-            "current": None, "active": True, "message": None, "web": web, "estimate": estimate, "lock": threading.Lock()}
+def monitoring_jobs(companies, criteria, scores, today=None) -> list[dict]:
+    """One check per monitored company, covering all active criteria, for incidents since its last monitoring check."""
+    today = today or date.today()
+    first = (today - timedelta(days=MONITOR_FIRST_DAYS)).isoformat()
+    jobs = []
+    for h in sorted(companies, key=lambda c: (-(c.get("weight") or 0), c["name"])):
+        checked = [(scores.get((h["id"], c["id"])) or {}).get("monitor_checked") for c in criteria]
+        since = min(checked) if all(checked) else first
+        jobs.append({"company": h, "criteria": list(criteria), "since": since})
+    return jobs
+
+
+def new_run(jobs, *, web, estimate, kind="manual") -> dict:
+    return {"jobs": list(jobs), "total": len(jobs), "done": 0, "findings": 0, "alerts": 0, "left_out": 0, "checks": [], "failed_jobs": [], "errors": [], "failures": 0,
+            "current": None, "active": True, "message": None, "web": web, "estimate": estimate, "kind": kind,
+            "lock": threading.Lock()}
 
 
 def label(job) -> str:
@@ -75,20 +89,36 @@ def start_next(run, sb, client) -> threading.Thread | None:
 
 def _work(run, job, sb, client) -> None:
     try:
-        result = service.run_check(sb, client, job["company"], job["criteria"], web=run["web"], estimate=run["estimate"])
-        service.refresh_summaries(sb, client, job["company"], job["criteria"])
+        options = {}
+        if run.get("kind") == "monitor":
+            options = {"kind": "monitor", "model": MODEL_MONITOR, "max_searches": SEARCHES_MONITOR, "since": job.get("since")}
+        result = service.run_check(sb, client, job["company"], job["criteria"], web=run["web"], estimate=run["estimate"], **options)
+        covered = [c for c in job["criteria"] if c["id"] in result.scores]
+        service.refresh_summaries(sb, client, job["company"], covered)
+        missing = getattr(result, "missing", None) or []
+        if missing and not job.get("retry"):
+            # The answer left out some criteria: check those again in a separate check.
+            with run["lock"]:
+                run["jobs"].insert(0, {**job, "criteria": missing, "retry": True})
+                run["total"] += 1
+        elif missing:
+            message = "The AI answer did not cover this criterion. Nothing was saved."
+            run["errors"].append(f"{label({**job, 'criteria': missing})}: {message}")
+            run["checks"] += check_records({**job, "criteria": missing}, error=message)
+            run["failed_jobs"].append({**job, "criteria": missing, "retry": False})
         run["done"] += 1
         run["failures"] = 0
         run["findings"] += len(result.new)
         run["alerts"] += len(result.alerts)
         run["left_out"] += result.left_out
-        run["checks"] += check_records(job, result)
+        run["checks"] += check_records({**job, "criteria": covered}, result)
     except service.LimitReached as e:
         run["jobs"].insert(0, job)
         run["message"], run["active"] = str(e), False
     except screening.ScreeningError as e:
         run["errors"].append(f"{label(job)}: {e}")
         run["checks"] += check_records(job, error=str(e))
+        run["failed_jobs"].append({**job, "retry": False})
         run["failures"] += 1
         if run["failures"] >= 2:    # avoid paying for a series of failures
             run["message"], run["active"] = "The screening was stopped after two failed checks in a row.", False

@@ -1,10 +1,12 @@
-"""Screening. Sections: Holding Screening now; Portfolio Monitoring and Pre-investment Screening follow."""
+"""Screening: Portfolio Monitoring and Holding Screening. Pre-investment Screening follows."""
+from datetime import date
+
 import pandas as pd
 import streamlit as st
 
 from redline import auth, db, rules, runner, service, summary, ui
 from redline import criteria as criteria_rules
-from redline.constants import AI_NOTE, TEMPLATES
+from redline.constants import AI_NOTE, MONITOR_COST, MONITOR_MAX_COMPANIES, TEMPLATES
 
 ui.page_header("Screening", "Revenue exposure and incident checks.")
 st.caption(AI_NOTE)
@@ -169,8 +171,41 @@ def holding_screening() -> None:
                 st.error(str(e))
                 return
             keep_form()
-            state.screening_run = runner.new_run(run_now, web=web, estimate=estimate)
+            state.screening_run = runner.new_run(run_now, web=web, estimate=estimate, kind="manual")
             st.rerun()
+
+
+BADGE = {"breach": "red", "watch": "orange", "clear": "green", "partial": "gray", "na": "gray"}
+ORDER = {"breach": 0, "watch": 1}
+
+
+def retry(run) -> None:
+    """Runs the failed checks again. For monitoring this does not count as a new daily run."""
+    jobs = [dict(j, retry=False) for j in run["failed_jobs"]]
+    state.screening_run = runner.new_run(jobs, web=run["web"], estimate=run["estimate"], kind=run.get("kind", "manual"))
+    state.screening_run["recorded"] = True
+
+
+def company_header(name, items) -> str:
+    """Expander label: company, a badge per criterion, and the new and updated findings or the failure."""
+    failed = [c for c in items if c["error"]]
+    if failed and len(failed) == len(items):
+        return f"**{ui.md_escape(name)}** · :red-badge[Check failed] {ui.md_escape(failed[0]['error'])}"
+    badges = " ".join(
+        f":red-badge[{ui.md_escape(c['criterion'])}: Failed]" if c["error"] else
+        f":{BADGE[c['after']]}-badge[{ui.md_escape(c['criterion'])}: {rules.LABELS[c['after']]}]"
+        for c in items)
+    new = sum(len(c["new"]) for c in items)
+    updated = sum(len(c["updated"]) for c in items)
+    found = f"{new} new, {updated} updated" if new or updated else "no incidents found"
+    return f"**{ui.md_escape(name)}** · {badges} · {found}"
+
+
+def company_rank(items) -> tuple:
+    if all(c["error"] for c in items):
+        return (3,)
+    best = min(ORDER.get(c["after"], 2) for c in items if not c["error"])
+    return (best,)
 
 
 def results(run) -> None:
@@ -178,30 +213,38 @@ def results(run) -> None:
         all_findings = db.findings()
         findings = {f["id"]: f for f in all_findings}
         scores = rules.index_scores(db.scores())
-        status = db.ai_status()
+        status = db.monitor_status() if run.get("kind") == "monitor" else db.ai_status()
     except db.DataError as e:
         st.error(str(e))
         return
     checks = run["checks"]
+    allowed = int(status["global"]) > 0 and int(status["budget"]) > 0 if run.get("kind") == "monitor" \
+        else int(status["remaining"]) > 0
     with st.container(border=True, key="panel-run"):
         st.subheader("Results of This Run", anchor=False)
-        st.write(f"Checks completed: {run['done']} of {run['total']}. Failed: {len(run['errors'])}. "
-                 f"New findings: {run['findings']}. New alerts: {run['alerts']}.")
+        line = (f"Checks completed: {run['done']} of {run['total']}. Failed: {len(run['errors'])}. "
+                f"New findings: {run['findings']}.")
+        if run["errors"]:
+            st.warning(line)
+        else:
+            st.success(line)
         if run["message"]:
             st.info(run["message"])
         if run["left_out"]:
             st.caption(f"Findings left out because their sources did not match or named an outlet without a link: {run['left_out']}.")
         with st.container(horizontal=True):
             if run["jobs"]:
-                st.button(f"Resume ({len(run['jobs'])} open)", type="primary", on_click=resume,
-                          disabled=int(status["remaining"]) < 1)
+                st.button(f"Resume ({len(run['jobs'])} open)", type="primary", on_click=resume, disabled=not allowed)
+            if run["failed_jobs"] and not run["jobs"] and not db.is_read_only():
+                st.button(f"Retry failed checks ({len(run['failed_jobs'])})", type="primary", on_click=retry, args=(run,),
+                          disabled=not allowed)
             st.button("Clear results", on_click=clear)
 
-        with st.expander("Results", expanded=True):
+        with st.expander("Results table"):
             st.dataframe(
                 ui.status_style(pd.DataFrame([
                     {"Company": c["company"], "Criterion": c["criterion"],
-                     "Change": "" if c["error"] else f"{rules.LABELS[c['before']]} → {rules.LABELS[c['after']]}",
+                     "Change": "" if c["error"] else f"{rules.LABELS[c['before']]} \u2192 {rules.LABELS[c['after']]}",
                      "Status": "Failed" if c["error"] else rules.LABELS[c["after"]],
                      "Revenue %": c["exposure"], "Revenue source": c["revenue_source"]}
                     for c in checks
@@ -211,13 +254,18 @@ def results(run) -> None:
             )
             st.caption("AI results are estimates. Unsourced revenue estimates can cause Watch but not Breach.")
 
-        with st.expander("Findings", expanded=True):
-            linked = set()
-            for i, c in enumerate(checks):
-                st.markdown(f"**{ui.md_escape(c['company'])} / {ui.md_escape(c['criterion'])}**")
-                if c["error"]:
-                    st.caption(f"Check failed: {c['error']}")
-                else:
+        companies = {}
+        for c in checks:
+            companies.setdefault(c["company_id"], []).append(c)
+        for n, (company_id, items) in enumerate(sorted(companies.items(), key=lambda kv: company_rank(kv[1]))):
+            with st.expander(company_header(items[0]["company"], items)):
+                for c in items:
+                    st.markdown(f"**{ui.md_escape(c['criterion'])}**")
+                    if c["error"]:
+                        st.caption(f"Check failed: {c['error']}")
+                        continue
+                    if c["before"] != c["after"]:
+                        st.caption(f"{rules.LABELS[c['before']]} \u2192 {rules.LABELS[c['after']]}")
                     criterion = next((x for x in criteria if x["id"] == c["criterion_id"]), None)
                     score = scores.get((c["company_id"], c["criterion_id"]))
                     pair = [f for f in all_findings if f["holding_id"] == c["company_id"] and f["criterion_id"] == c["criterion_id"]]
@@ -232,17 +280,106 @@ def results(run) -> None:
                         st.caption(f"No incidents found for {c['company']} / {c['criterion']}.")
                     for f, mark in sorted(shown, key=lambda p: (p[1] != "New", -rules.LEVELS.index(p[0]["severity"]))):
                         ui.finding_card(f, mark=mark)
-                last = i + 1 == len(checks) or checks[i + 1]["company_id"] != c["company_id"]
-                if last and c["company_id"] not in linked:
-                    linked.add(c["company_id"])
-                    ui.company_link(c["company_id"], f"View all findings for {c['company']}", key=f"view-{i}")
-            st.caption("Incident summaries are generated by AI from the linked sources.")
+                ui.company_link(company_id, f"View all findings for {items[0]['company']}", key=f"view-{n}")
+        st.caption("Incident summaries are generated by AI from the linked sources.")
 
+
+# ---------- Portfolio Monitoring ----------
+
+def save_monitored() -> None:
+    try:
+        db.set_monitored(state["pm-companies"], [h["id"] for h in holdings])
+    except db.DataError as e:
+        state["_pm_error"] = str(e)
+
+
+def save_enabled() -> None:
+    try:
+        db.save_workspace({"monitor": {**(workspace.get("monitor") or {}), "enabled": state["pm-enabled"]}})
+    except db.DataError as e:
+        state["_pm_error"] = str(e)
+
+
+def portfolio_monitoring() -> None:
+    try:
+        status = db.monitor_status()
+        scores = rules.index_scores(db.scores())
+    except db.DataError as e:
+        st.error(str(e))
+        return
+    held = [h for h in holdings if h["type"] == "holding"]
+    by_id = {h["id"]: h for h in held}
+    active = [c for c in criteria if c["active"]]
+    with st.container(border=True, key="panel-monitoring"):
+        st.subheader("Portfolio Monitoring", anchor=False)
+        if "_pm_error" in state:
+            st.error(state.pop("_pm_error"))
+        state["pm-enabled"] = bool((workspace.get("monitor") or {}).get("enabled"))
+        st.toggle("Daily monitoring", key="pm-enabled", on_change=save_enabled, disabled=db.is_read_only())
+        state["pm-companies"] = [h["id"] for h in held if h.get("monitored")]
+        st.multiselect(f"Companies (at most {MONITOR_MAX_COMPANIES})", list(by_id), key="pm-companies",
+                       max_selections=MONITOR_MAX_COMPANIES, on_change=save_monitored, disabled=db.is_read_only(),
+                       format_func=lambda i: by_id[i]["name"], placeholder="Select companies")
+        chosen = [by_id[i] for i in state["pm-companies"]]
+        last = workspace.get("monitor_last_run")
+        kind = {"manual": "manual", "automatic": "automatic"}.get(workspace.get("monitor_last_kind"), "")
+        a, b, c, d = st.columns(4)
+        a.metric("Companies covered", len(chosen), border=True)
+        b.metric("Last run", last or "Not yet", border=True, help=f"Run type: {kind}" if kind else None)
+        c.metric("Next run", "07:00" if state["pm-enabled"] else "Off", border=True,
+                 help="Daily at 07:00 Swiss time. The automatic schedule is activated in a later stage.")
+        d.metric("Expected daily cost", f"${len(chosen) * MONITOR_COST:.2f}", border=True,
+                 help="Estimate for one check per company covering all active criteria.")
+        st.caption("One check per company covering all active criteria, for incidents since the last monitoring check. "
+                   "Results appear on Alerts.")
+        jobs = runner.monitoring_jobs(chosen, active, scores)[: int(status["global"])]
+        if db.is_read_only():
+            st.info("AI checks are not available in the demo account.")
+        elif status["run_today"]:
+            st.info("Run now is available once per day.")
+        elif not chosen:
+            st.write("Select at least one company.")
+        elif not int(status["budget"]):
+            st.info(service.BUDGET_MESSAGE)
+        elif not jobs:
+            st.info(service.LIMIT_MESSAGE)
+        else:
+            st.write(f"This will run {len(jobs)} {'check' if len(jobs) == 1 else 'checks'}.")
+        ready = bool(jobs) and not status["run_today"] and int(status["budget"]) > 0 and not db.is_read_only() and bool(key)
+        if st.button("Run now", type="primary", disabled=not ready):
+            if not db.start_monitoring_run():
+                st.info("Run now is available once per day.")
+                return
+            state.screening_run = runner.new_run(jobs, web=True, estimate=estimate, kind="monitor")
+            st.rerun()
+
+
+def record_monitoring(run) -> None:
+    """Stores the date of a finished manual monitoring run once."""
+    if run.get("kind") == "monitor" and run["done"] and not run.get("recorded"):
+        run["recorded"] = True
+        try:
+            db.save_workspace({"monitor_last_run": date.today().isoformat(), "monitor_last_kind": "manual"})
+        except db.DataError:
+            run["recorded"] = False
+
+
+SECTIONS = {"monitoring": "Portfolio Monitoring", "holding": "Holding Screening"}
 
 run = state.get("screening_run")
 if run and (run["active"] or run["current"]):
     progress()
 else:
-    holding_screening()
     if run:
+        state.setdefault("screening-section", "monitoring" if run.get("kind") == "monitor" else "holding")
+    if state.get("screening-section") not in SECTIONS:
+        state["screening-section"] = "holding"
+    section = st.segmented_control("Section", list(SECTIONS), format_func=SECTIONS.get, required=True,
+                                   key="screening-section", label_visibility="collapsed")
+    if section == "monitoring":
+        portfolio_monitoring()
+    else:
+        holding_screening()
+    if run and (run.get("kind") == "monitor") == (section == "monitoring"):
+        record_monitoring(run)
         results(run)

@@ -69,11 +69,20 @@ class FakeClient:
     def __init__(self, signed_in):
         self.auth, self.tables = FakeAuth(signed_in), {}
         self.status = {"user": 15, "global": 60, "budget": 20, "remaining": 15}
+        self.monitor = {"global": 10, "budget": 40, "run_today": False, "read_only": False}
 
     def table(self, name):
         return FakeTable(self.tables.setdefault(name, []))
 
     def rpc(self, name, args=None):
+        if name == "monitor_status":
+            return SimpleNamespace(execute=lambda: SimpleNamespace(data=dict(self.monitor)))
+        if name == "start_monitoring_run":
+            def start():
+                started = not self.monitor["run_today"]
+                self.monitor["run_today"] = True
+                return SimpleNamespace(data=started)
+            return SimpleNamespace(execute=start)
         # Summaries are never generated in tests that use the full page.
         return SimpleNamespace(execute=lambda: SimpleNamespace(data=False if name == "can_summarize" else self.status))
 

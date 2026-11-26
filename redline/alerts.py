@@ -1,44 +1,57 @@
-"""Alerts joined with their findings. No Streamlit import."""
+"""Alerts: results of Portfolio Monitoring and provider incidents, one card per company. No Streamlit import."""
+from redline import rules, summary
 from redline.providers import safe_url
 
-SEVERITIES = ("severe", "high", "medium", "low")
 OPEN = ("new", "escalated")
 
 
-def join(alerts, findings, holdings, criteria) -> list[dict]:
-    """One entry per alert: company, criteria, date and all sources. Newest first, unknown dates last."""
-    by_finding = {f["id"]: f for f in findings}
-    by_id = {h["id"]: h for h in holdings}
-    labels = {c["id"]: c["label"] for c in criteria}
-    names = {}
+def monitoring_view(holdings, criteria, scores, findings, alerts) -> dict:
+    """{"breach": [card], "watch": [card], "has_results": bool}. A card holds one company and its lines."""
+    active = [c for c in criteria if c["active"]]
+    by_ticker = {h.get("ticker") or h["name"]: h for h in holdings}
+    cards = {"breach": {}, "watch": {}}
+    has_results = False
     for h in holdings:
-        names.setdefault(h.get("ticker") or h["name"], h["name"])
-    out = []
+        for c in active:
+            score = scores.get((h["id"], c["id"]))
+            if not score or not score.get("monitor_checked"):
+                continue
+            has_results = True
+            state = rules.evaluate(score, c)["state"]
+            if state not in cards:
+                continue
+            pair = [f for f in findings if f["holding_id"] == h["id"] and f["criterion_id"] == c["id"]]
+            card = cards[state].setdefault(h["id"], {"company": h, "lines": [], "provider": [], "new": False})
+            current = summary.is_current(score, pair, c)
+            card["lines"].append({
+                "criterion": c, "state": state, "summary": score.get("summary") if current else None,
+                "findings": sum(f["status"] == "open" for f in pair), "new": bool(score.get("monitor_new")),
+                "checked": score["monitor_checked"],
+            })
+            card["new"] = card["new"] or bool(score.get("monitor_new"))
     for a in alerts:
-        f = by_finding.get(a.get("finding_id"))
-        ids = {h.get("ticker") or h["name"]: h["id"] for h in holdings}
-        if f and f["holding_id"] in by_id:
-            companies, holding_ids = [by_id[f["holding_id"]]["name"]], [f["holding_id"]]
-        else:
-            companies = [names.get(t, t) for t in a.get("tickers") or []]
-            holding_ids = [ids[t] for t in a.get("tickers") or [] if t in ids]
-        url = safe_url(a.get("url"))
-        out.append({
-            "id": a["id"], "title": a["title"], "summary": a.get("summary"), "severity": a["severity"], "status": a["status"],
-            "companies": companies, "holding_ids": holding_ids, "criteria": [labels[i] for i in a.get("criteria") or [] if i in labels],
-            "criterion_ids": a.get("criteria") or [], "date": a.get("date"),
-            "date_type": (f.get("date_type") or "reported") if f else None, "category": f["category"] if f else None, "finding": f,
-            "date_precision": f.get("date_precision") if f else None,
-            "sources": f["sources"] if f else [{"url": url}] if url else [], "origin": a.get("source"),
-        })
-    return sorted(out, key=lambda a: a["date"] or "", reverse=True)
+        if a.get("origin") != "reprisk" or a.get("status") not in OPEN:
+            continue
+        for t in a.get("tickers") or []:
+            h = by_ticker.get(t)
+            if not h:
+                continue
+            has_results = True
+            box = "breach" if h["id"] in cards["breach"] else "watch"
+            card = cards[box].setdefault(h["id"], {"company": h, "lines": [], "provider": [], "new": False})
+            card["provider"].append({"title": a["title"], "date": a.get("date"), "severity": a["severity"], "url": safe_url(a.get("url"))})
+    order = lambda card: (not card["new"], -(card["company"].get("weight") or 0), card["company"]["name"])  # noqa: E731
+    return {"breach": sorted(cards["breach"].values(), key=order), "watch": sorted(cards["watch"].values(), key=order),
+            "has_results": has_results}
 
 
-def select(entries, *, open_only=True, severities=(), companies=(), criteria=()) -> list[dict]:
-    return [
-        e for e in entries
-        if (not open_only or e["status"] in OPEN)
-        and (not severities or e["severity"] in severities)
-        and (not companies or set(companies) & set(e["companies"]))
-        and (not criteria or set(criteria) & set(e["criterion_ids"]))
-    ]
+def select(cards, companies=(), criteria=()) -> list[dict]:
+    out = []
+    for card in cards:
+        if companies and card["company"]["id"] not in companies:
+            continue
+        lines = [x for x in card["lines"] if not criteria or x["criterion"]["id"] in criteria]
+        if criteria and not lines:
+            continue
+        out.append({**card, "lines": lines})
+    return out

@@ -35,9 +35,8 @@ def test_profile_shows_status_findings_and_dates(make_app):
 
 def test_links_from_alerts_and_overview(make_app):
     f = stored(holding_id="h1", severity="high", involvement="company", evidence="proven", legal_status="none")
-    alert = {"id": "a1", "finding_id": f["id"], "title": "T", "summary": "S", "date": None, "severity": "high", "tickers": ["PLTR"],
-             "criteria": ["c1"], "url": URL, "source": "AI web search", "status": "new"}
-    app = make(make_app, findings=[f], alerts=[alert]).switch_page("views/alerts.py").run()
+    monitored = {"holding_id": "h1", "criterion_id": "c1", "controversy": {"level": "high"}, "monitor_checked": "2026-11-26"}
+    app = make(make_app, findings=[f], scores=[monitored]).switch_page("views/alerts.py").run()
     next(b for b in app.button if b.label == "Company profile").click().run()
     assert not app.exception
     assert app.session_state[ui.COMPANY_KEY] == "h1"

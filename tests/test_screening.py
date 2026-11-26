@@ -343,3 +343,9 @@ def test_logging_works_without_migration_007():
     service.run_check(sb, Fake(reply(search(URL), text(answer()))), META, [MIL])
     finish = [a for n, a in sb.calls if n == "finish_ai_check"]
     assert len(finish) == 1 and "p_stop" not in finish[0] and finish[0]["p_status"] == "done"
+
+
+def test_partial_answer_keeps_covered_criteria():
+    child = {**CHILD}
+    r = run(Fake(reply(search(URL), text(answer(finding())))), criteria=[MIL, child])
+    assert list(r.scores) == ["c1"] and [c["id"] for c in r.missing] == ["c2"]
