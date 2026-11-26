@@ -32,14 +32,17 @@ try {
 
 
 def apply_style() -> None:
+    from redline import theme
     st.html(_CSS)
+    theme.apply()
     # Fixed text only: never pass user, AI or provider text to this call.
     st.html(_FRAME_LABEL, unsafe_allow_javascript=True)
 
 
-def page_header(title: str, subtitle: str) -> None:
-    st.title(title, anchor=False)
-    st.caption(subtitle)
+def page_header(title: str, subtitle: str = "", *_, **__) -> None:
+    """Title band with help. The subtitle is no longer shown; explanations are in the help."""
+    from redline import theme
+    theme.header(title)
 
 
 def empty_panel(key: str, text: str) -> None:
@@ -55,7 +58,7 @@ def set_notice(text: str) -> None:
 def show_notice() -> None:
     text = st.session_state.pop("_notice", None)
     if text:
-        st.success(text)
+        st.toast(text)
 
 
 _STATE_COLOURS = {
@@ -89,7 +92,7 @@ def setup_progress(steps) -> None:
         for column, step in zip(st.columns(3), steps):
             with column:
                 st.markdown(f"**{step['title']}**")
-                st.caption("Complete" if step["done"] else "Next step" if step is current else "Open")
+                st.caption("Complete" if step["done"] else "Next step" if step is current else "Not started")
                 if st.button("Edit" if step["done"] else "Continue", key=f"setup-{step['page']}",
                              type="primary" if step is current else "secondary",
                              disabled=not step["done"] and step is not current):
@@ -142,7 +145,8 @@ STATUS_COLOURS = {"breach": "red", "watch": "orange", "clear": "green", "partial
 
 
 def status_badge(state) -> None:
-    st.badge(LABELS[state], color=STATUS_COLOURS[state])
+    from redline import theme
+    theme.show_pill(state)
 
 
 def finding_card(finding, action=None, mark=None, seen=False) -> None:

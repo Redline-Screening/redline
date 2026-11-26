@@ -2,6 +2,7 @@
 import time
 from datetime import date
 
+from conftest import page_title
 from test_runner import result_for
 from test_screening import stored
 
@@ -34,8 +35,9 @@ def finish(app):
 def test_section_shows_coverage_and_cost(make_app):
     app = open_page(make_app)
     assert not app.exception
-    assert [s.value for s in app.subheader] == ["Portfolio Monitoring"]
-    assert [m.value for m in app.metric] == ["3", "Not yet", "Off", "$0.09"]
+    assert page_title(app) == "Portfolio Monitoring"
+    assert [m.value for m in app.metric] == ["3", "Not yet", "$0.09"]
+    assert any('class="rl-switch-state">Off<' in h.proto.body for h in app.get("html"))
     assert app.multiselect[0].value == ["h1", "h2", "h3"]
     assert "This will run 3 checks." in [m.value for m in app.markdown]
 
@@ -44,7 +46,7 @@ def test_toggle_and_selection_are_saved(make_app):
     app = open_page(make_app)
     app.toggle[0].set_value(True).run()
     assert app.session_state["_supabase"].tables["workspaces"][0]["monitor"]["enabled"] is True
-    assert app.metric[2].value == "07:00"
+    assert any("On \u2013 next run 07:00" in h.proto.body for h in app.get("html"))
     app.multiselect[0].unselect("h3").run()
     monitored = [h["id"] for h in app.session_state["_supabase"].tables["holdings"] if h["monitored"]]
     assert monitored == ["h1", "h2"]

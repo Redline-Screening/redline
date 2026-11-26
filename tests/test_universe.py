@@ -1,3 +1,4 @@
+from conftest import notice, page_title
 from pathlib import Path
 
 SAMPLE = Path(__file__).resolve().parent.parent / "sample" / "universe.csv"
@@ -22,10 +23,10 @@ def test_import_twice_creates_no_duplicates(make_app):
     upload(app)
     assert len(data(app)) == 10
     assert [m.value for m in app.metric] == ["10", "70.00%", "0"]
-    assert app.success[0].value == "Companies added: 10. Updated: 0."
+    assert notice(app) == "Companies added: 10. Updated: 0."
     upload(app)
     assert len(data(app)) == 10
-    assert app.success[0].value == "Companies added: 0. Updated: 10."
+    assert notice(app) == "Companies added: 0. Updated: 10."
 
 
 def add(app, name, isin=""):

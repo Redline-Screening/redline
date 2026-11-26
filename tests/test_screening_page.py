@@ -2,6 +2,7 @@
 import time
 
 import pytest
+from conftest import page_title
 from test_runner import C1, result_for
 from test_screening import stored
 
@@ -57,13 +58,13 @@ def finish(app):
 
 
 def test_first_run(app):
-    assert [s.value for s in app.subheader] == ["Holding Screening"]
+    assert page_title(app) == "Holding Screening"
     assert "Select at least one company and one criterion." in texts(app)
     app.multiselect[0].select("h1").select("h2").select("h3").run()
     assert "This will run 3 checks. 15 remaining today." in texts(app)
     assert [b.label for b in app.button if b.proto.type == "primary"] == ["Run screening"]
     next(b for b in app.button if b.label == "Run screening").click().run()
-    assert "Holding Screening" not in [s.value for s in app.subheader]
+    assert "Screening in Progress" in [s.value for s in app.subheader]
     finish(app)
 
     assert app.multiselect[0].value == ["h1", "h2", "h3"]        # the selection is kept after the run
@@ -112,7 +113,7 @@ def test_clear_results(app):
     next(b for b in app.button if b.label == "Run screening").click().run()
     finish(app)
     next(b for b in app.button if b.label == "Clear results").click().run()
-    assert not app.expander and [s.value for s in app.subheader] == ["Holding Screening"]
+    assert not app.expander and "Results of This Run" not in [s.value for s in app.subheader]
 
 
 def test_leaving_the_page_pauses(make_app, monkeypatch):

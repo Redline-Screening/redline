@@ -8,8 +8,11 @@ from redline import auth, db, rules, runner, service, summary, ui
 from redline import criteria as criteria_rules
 from redline.constants import AI_NOTE, MONITOR_COST, MONITOR_MAX_COMPANIES, TEMPLATES
 
-ui.page_header("Screening", "Revenue exposure and incident checks.")
-st.caption(AI_NOTE)
+_SECTION_TITLES = {"monitoring": "Portfolio Monitoring", "holding": "Holding Screening"}
+# Screening opens on Portfolio Monitoring unless another section was chosen.
+if st.session_state.get("screening-section") not in _SECTION_TITLES:
+    st.session_state["screening-section"] = "monitoring"
+ui.page_header(_SECTION_TITLES[st.session_state["screening-section"]])
 
 state = st.session_state
 
@@ -116,7 +119,6 @@ def holding_screening() -> None:
     remaining = int(status["remaining"])
     by_id = {h["id"]: h for h in holdings}
     with st.container(border=True, key="panel-screening"):
-        st.subheader("Holding Screening", anchor=False)
         if any(i not in by_id for i in state.get("hs-companies", [])):
             state["hs-companies"] = [i for i in state["hs-companies"] if i in by_id]
         picked = st.multiselect("Companies", list(by_id), placeholder="Select companies", key="hs-companies",
@@ -311,11 +313,12 @@ def portfolio_monitoring() -> None:
     by_id = {h["id"]: h for h in held}
     active = [c for c in criteria if c["active"]]
     with st.container(border=True, key="panel-monitoring"):
-        st.subheader("Portfolio Monitoring", anchor=False)
         if "_pm_error" in state:
             st.error(state.pop("_pm_error"))
         state["pm-enabled"] = bool((workspace.get("monitor") or {}).get("enabled"))
-        st.toggle("Daily monitoring", key="pm-enabled", on_change=save_enabled, disabled=db.is_read_only())
+        with st.container(horizontal=True, vertical_alignment="center", key="pm-switch"):
+            st.toggle("Daily monitoring", key="pm-enabled", on_change=save_enabled, disabled=db.is_read_only())
+            st.html(f'<p class="rl-switch-state">{"On \u2013 next run 07:00" if state["pm-enabled"] else "Off"}</p>')
         state["pm-companies"] = [h["id"] for h in held if h.get("monitored")]
         st.multiselect(f"Companies (at most {MONITOR_MAX_COMPANIES})", list(by_id), key="pm-companies",
                        max_selections=MONITOR_MAX_COMPANIES, on_change=save_monitored, disabled=db.is_read_only(),
@@ -323,11 +326,9 @@ def portfolio_monitoring() -> None:
         chosen = [by_id[i] for i in state["pm-companies"]]
         last = workspace.get("monitor_last_run")
         kind = {"manual": "manual", "automatic": "automatic"}.get(workspace.get("monitor_last_kind"), "")
-        a, b, c, d = st.columns(4)
+        a, b, d = st.columns(3)
         a.metric("Companies covered", len(chosen), border=True)
         b.metric("Last run", last or "Not yet", border=True, help=f"Run type: {kind}" if kind else None)
-        c.metric("Next run", "07:00" if state["pm-enabled"] else "Off", border=True,
-                 help="Daily at 07:00 Swiss time. The automatic schedule is activated in a later stage.")
         d.metric("Expected daily cost", f"${len(chosen) * MONITOR_COST:.2f}", border=True,
                  help="Estimate for one check per company covering all active criteria.")
         st.caption("One check per company covering all active criteria, for incidents since the last monitoring check. "
@@ -373,9 +374,8 @@ else:
     if run:
         state.setdefault("screening-section", "monitoring" if run.get("kind") == "monitor" else "holding")
     if state.get("screening-section") not in SECTIONS:
-        state["screening-section"] = "holding"
-    section = st.segmented_control("Section", list(SECTIONS), format_func=SECTIONS.get, required=True,
-                                   key="screening-section", label_visibility="collapsed")
+        state["screening-section"] = "monitoring"
+    section = state["screening-section"]
     if section == "monitoring":
         portfolio_monitoring()
     else:
@@ -383,3 +383,5 @@ else:
     if run and (run.get("kind") == "monitor") == (section == "monitoring"):
         record_monitoring(run)
         results(run)
+
+st.caption(AI_NOTE)

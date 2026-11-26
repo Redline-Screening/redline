@@ -137,8 +137,8 @@ def custom_panel() -> None:
 
 if items:
     active = sum(c["active"] for c in items)
-    st.caption(f"Active criteria: {active} of {len(items)}.")
     with st.container(border=True, key="panel-criteria"):
+        st.caption(f"Active criteria: {active} of {len(items)}.")
         table_panel()
 
 with st.container(border=True, key="panel-add"):

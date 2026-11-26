@@ -1,3 +1,4 @@
+from conftest import notice, page_title
 def H(i, name, w):
     return {"id": i, "name": name, "weight": w, "type": "holding"}
 
@@ -20,7 +21,7 @@ def test_assessment_reaches_overview(make_app):
     assert not app.exception
     app.number_input[0].set_value(5.0)
     next(b for b in app.button if b.label == "Save assessment").click().run()
-    assert app.success[0].value == "Assessment saved."
+    assert notice(app) == "Assessment saved."
     app.selectbox[0].select("2").run()
     app.number_input[0].set_value(0.0)
     app.number_input[1].set_value(60.0)

@@ -1,4 +1,5 @@
 """Company Profiles, links to them, and the content rules of part 1."""
+from conftest import notice, page_title
 import pytest
 from test_screening import MIL, URL, Fake, answer, finding, reply, run, search, stored, text
 
@@ -23,7 +24,7 @@ def test_profile_shows_status_findings_and_dates(make_app):
     app.session_state[ui.COMPANY_KEY] = "h2"
     app.switch_page("views/company.py").run()
     assert not app.exception
-    assert app.title[0].value == "Company Profile" and app.selectbox[0].value == "h2"
+    assert page_title(app) == "Company Profile" and app.selectbox[0].value == "h2"
     table = app.dataframe[0].value
     assert list(table["Revenue source"]) == ["Unsourced estimate"] and list(table["Last web check"]) == ["2026-11-26"]
     captions = " ".join(c.value.replace("\\", "") for c in app.caption)

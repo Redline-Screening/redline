@@ -1,41 +1,61 @@
-def fill(app, offset, *values):
-    for i, v in enumerate(values):
-        app.text_input[offset + i].input(v)
-    return app
+"""Landing page and sign-in. AppTest cannot operate dialogs, so the sign-in logic is tested directly."""
+import pytest
+
+from redline import auth
 
 
-def test_signed_out_sees_only_login(make_app):
+def test_signed_out_sees_the_landing_page(make_app):
     app = make_app(signed_in=False)
     assert not app.exception
-    assert app.title[0].value == "Redline"
+    body = " ".join(h.proto.body for h in app.get("html"))
+    assert "Know when your portfolio crosses the line." in body
+    assert "alerts you when a holding crosses a line" in body
+    assert [b.label for b in app.button][:2] == ["Sign in", "Create account"]
+    assert "funded privately" not in " ".join(c.value for c in app.caption)
+    assert not app.sidebar.button
 
 
-def test_wrong_password(make_app):
-    app = fill(make_app(signed_in=False), 0, "a@example.com", "wrong")
-    app.button[0].click().run()
-    assert app.error[0].value == "Email or password is incorrect."
+def test_analysis_card_opens_the_sections(make_app):
+    app = make_app(signed_in=False)
+    assert not app.expander
+    next(b for b in app.button if b.label == "›").click().run()
+    assert [e.label for e in app.expander] == ["Portfolio Monitoring", "Holding Screening", "Pre-investment Screening",
+                                               "Company Profiles", "Alerts"]
 
 
-def test_sign_in_and_out(make_app):
-    app = fill(make_app(signed_in=False), 0, "a@example.com", "right-password")
-    app.button[0].click().run()
-    assert app.title[0].value == "Overview"
-    auth = app.session_state["_supabase"].auth
-    app.button(key="sign-out").click().run()
-    assert auth.session is None
+@pytest.fixture
+def client(make_app, monkeypatch):
+    c = make_app(signed_in=False).session_state["_supabase"]
+    monkeypatch.setattr(auth, "client", lambda: c)
+    monkeypatch.setattr(auth.st, "secrets", {"SIGNUP_ACCESS_CODE": "the-code"})
+    return c
 
 
-def test_wrong_access_code_creates_no_account(make_app):
-    app = fill(make_app(signed_in=False), 2, "b@example.com", "right-password", "nope")
-    app.button[1].click().run()
-    assert app.error[0].value == "The access code is not valid."
-    assert app.session_state["_supabase"].auth.sign_ups == 0
+def test_wrong_password(client):
+    with pytest.raises(auth.SignInError, match="Email or password is incorrect."):
+        auth.sign_in("a@example.com", "wrong")
 
 
-def test_right_access_code(make_app):
-    app = fill(make_app(signed_in=False), 2, "b@example.com", "right-password", "the-code")
-    app.button[1].click().run()
-    assert app.title[0].value == "Overview"
+def test_sign_in(client):
+    auth.sign_in("a@example.com", "right-password")
+    assert client.auth.session is not None
+
+
+def test_wrong_access_code_creates_no_account(client):
+    with pytest.raises(auth.SignInError, match="The access code is not valid."):
+        auth.sign_up("b@example.com", "right-password", "nope")
+    assert client.auth.sign_ups == 0
+
+
+def test_right_access_code(client):
+    assert auth.sign_up("b@example.com", "right-password", "the-code") is True
+
+
+def test_sign_out(make_app):
+    app = make_app()
+    auth_ = app.session_state["_supabase"].auth
+    next(b for b in app.sidebar.button if b.label == "Sign out").click().run()
+    assert auth_.session is None
 
 
 def test_missing_settings(make_app):

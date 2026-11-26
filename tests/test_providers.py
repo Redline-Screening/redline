@@ -1,3 +1,4 @@
+from conftest import notice, page_title
 from pathlib import Path
 
 import pytest
@@ -99,7 +100,7 @@ def test_page(make_app):
     assert next(b for b in app.button if b.label == "Import figures").disabled
     app.selectbox[0].select("other").run()
     click(app, "Import figures")
-    assert app.success[0].value == "Provider figures imported: 3."
+    assert notice(app) == "Provider figures imported: 3."
     app.file_uploader[1].upload("incidents.csv", (ROOT / "incidents.csv").read_bytes(), "text/csv").run()
     click(app, "Import incidents")
     assert len(tables["alerts"]) == 1

@@ -1,3 +1,4 @@
+from conftest import notice, page_title
 from redline import db
 
 CRIT = {"id": "c1", "key": "m", "label": "Military", "type": "both", "threshold": 0, "watch_at": 50,
@@ -44,7 +45,7 @@ def test_button_only_with_settings(make_app):
     app.secrets["DEMO_EMAIL"], app.secrets["DEMO_PASSWORD"] = "d@example.com", "right-password"
     app.run()
     next(b for b in app.button if b.label == "View demo").click().run()
-    assert not app.exception and app.title[0].value == "Overview"
+    assert not app.exception and page_title(app) == "Overview"
 
 
 def test_demo_failure_shows_no_details(make_app):

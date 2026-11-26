@@ -1,3 +1,4 @@
+from conftest import notice, page_title
 import pytest
 
 from redline import criteria as cr
@@ -45,7 +46,7 @@ def test_page(make_app):
     app.multiselect[0].select("military").run()
     next(b for b in app.button if b.label == "Add criteria").click().run()
     assert not app.exception
-    assert app.success[0].value == "Criteria added: 1."
+    assert notice(app) == "Criteria added: 1."
     app.text_input[0].input("Fur")
     next(b for b in app.button if b.label == "Add criterion").click().run()
     assert not app.exception

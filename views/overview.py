@@ -30,7 +30,7 @@ def rename() -> None:
             st.rerun()
 
 
-with st.container(horizontal=True, vertical_alignment="center"):
+with st.container(border=True, key="panel-fund"), st.container(horizontal=True, vertical_alignment="center"):
     st.text(workspace.get("name") or "Unnamed fund")
     if st.button("Edit name", type="tertiary"):
         rename()

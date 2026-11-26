@@ -1,3 +1,5 @@
+import html
+import re
 from types import SimpleNamespace
 
 import pytest
@@ -122,6 +124,20 @@ def make_app():
         app.secrets["ANTHROPIC_API_KEY"] = "x"
         app.session_state["_supabase"] = FakeClient(signed_in)
         app.session_state["_supabase"].tables.update(tables)
+        app.session_state["screening-section"] = "holding"     # tests of Portfolio Monitoring set it themselves
         return app.run()
 
     return make
+
+
+def page_title(app) -> str:
+    """Title shown in the navy band."""
+    for h in app.get("html"):
+        m = re.search(r'class="rl-title">(.*?)</p>', h.proto.body)
+        if m:
+            return html.unescape(m.group(1))
+    return ""
+
+
+def notice(app) -> str:
+    return app.toast[0].value if len(app.toast) else ""

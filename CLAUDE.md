@@ -81,12 +81,19 @@ criteria (e.g. "0% revenue from military activity"). The app checks for breaches
 - Ask before running real, billed checks during development.
 
 ## Design
-- Professional institutional finance dashboard. Light grey background, white panels
-  with fine borders, navy sidebar with text labels, one blue accent (#1F5FBF),
-  muted red/amber/green for breach/watch/clear.
-- Font: Source Sans (Streamlit's default).
-- Easy to follow: clear setup progress (1. Investment Universe, 2. Exclusion Criteria,
-  3. Data Sources) and one obvious primary action per page.
+- Corporate, bank-style. All styling in redline/theme.py.
+- Landing page before sign-in (no sidebar): navy hero with the logo, "Know when your
+  portfolio crosses the line.", Sign in / Create account / View demo; one statement
+  sentence; step cards 1–4 (4 = Analysis, expands the five analysis sections).
+- Light sidebar: logo, large navigation with expanding Setup › and Screening ›; active
+  page navy and semibold with a short red bar; email, Help, Sign out below.
+- Every page: full-width navy band (#12254A) with the title and a "?" help popover; no
+  all-caps labels, no description line; the first content element is a card.
+- Page background #F6F7F9; borderless white cards, 14px radius, soft navy shadow.
+- Status pills with a coloured dot: Breach red, Watch amber, Clear green, Not screened and
+  Partly screened grey. Primary buttons navy, secondary white with a thin border.
+- Body 16px; labels, captions and metadata at least 14px in #3F4856 or darker.
+- Logo: "Redline" in navy #12254A with a thin red line #C8102E (assets/), tab icon "R".
 
 ## Wording
 - Professional and concise. Page titles are noun phrases, never questions

@@ -5,7 +5,7 @@ import streamlit as st
 
 from redline import db, rules, summary, ui
 
-ui.page_header("Company Profile", "Status, revenue exposure and findings by criterion.")
+ui.page_header("Company Profile")
 ui.show_notice()
 
 try:
@@ -18,14 +18,18 @@ except db.DataError as e:
     st.stop()
 
 if not holdings or not active:
-    ui.empty_panel("company", "An investment universe and at least one active criterion are required.")
+    with st.container(border=True, key="panel-company"):
+        st.write("An investment universe and at least one active criterion are required.")
+        target = "views/universe.py" if not holdings else "views/criteria.py"
+        st.page_link(target, label="Add companies" if not holdings else "Add criteria", icon=":material/arrow_forward:")
     st.stop()
 
 by_id = {h["id"]: h for h in holdings}
 if st.session_state.get(ui.COMPANY_KEY) not in by_id:
     st.session_state.pop(ui.COMPANY_KEY, None)
-holding = by_id[st.selectbox("Company", list(by_id), key=ui.COMPANY_KEY,
-                             format_func=lambda i: by_id[i]["name"] + (" (prospect)" if by_id[i]["type"] == "prospect" else ""))]
+with st.container(border=True, key="panel-select"):
+    holding = by_id[st.selectbox("Company", list(by_id), key=ui.COMPANY_KEY,
+                                 format_func=lambda i: by_id[i]["name"] + (" (prospect)" if by_id[i]["type"] == "prospect" else ""))]
 result = rules.evaluate_holding(holding, active, scores)
 
 with st.container(border=True, key="panel-status"):
