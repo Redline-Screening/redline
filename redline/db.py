@@ -54,9 +54,10 @@ def _all(table: str, order: str, desc: bool = False, then: str = "id") -> list[d
             return rows
 
 
-def holdings() -> list[dict]:
-    """All companies, largest weight first."""
-    return _all("holdings", "weight", desc=True)
+def holdings(candidates: bool = False) -> list[dict]:
+    """Companies of the universe, largest weight first. candidates=True also returns pre-investment companies."""
+    rows = _all("holdings", "weight", desc=True)
+    return rows if candidates else [h for h in rows if h["type"] != "candidate"]
 
 
 def save_holdings(records: list[dict]) -> None:
@@ -108,9 +109,10 @@ def alerts() -> list[dict]:
     return _all("alerts", "date", desc=True)
 
 
-def add_alerts(records: list[dict]) -> None:
+def add_alerts(records: list[dict]) -> list[dict]:
     if records:
-        _write(auth.client().table("alerts").insert(records))
+        return _write(auth.client().table("alerts").insert(records))
+    return []
 
 
 def workspace() -> dict:
@@ -171,3 +173,12 @@ def set_monitored(ids: list[str], all_ids: list[str]) -> None:
         _write(auth.client().table("holdings").update({"monitored": False}).in_("id", off))
     if ids:
         _write(auth.client().table("holdings").update({"monitored": True}).in_("id", ids))
+
+
+def alert_log() -> list[dict]:
+    return _all("alert_log", "day", desc=True)
+
+
+def add_log(rows: list[dict]) -> None:
+    if rows:
+        _write(auth.client().table("alert_log").insert(rows))

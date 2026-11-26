@@ -115,7 +115,9 @@ def incidents_panel() -> None:
     st.caption(f"{n} incidents to import, {len(plan['rows']) - n} rows skipped.")
     if st.button("Import incidents", type="primary", disabled=not n):
         try:
-            db.add_alerts(plan["records"])
+            saved = db.add_alerts(plan["records"])
+            from redline import alertlog
+            db.add_log(alertlog.provider_rows(saved, holdings, criteria, alertlog.today()))
             finish(f"Incidents imported: {n}.", "reprisk", n)
         except db.DataError as e:
             st.error(str(e))

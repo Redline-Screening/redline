@@ -96,6 +96,29 @@ def run_check(sb, client, company, criteria, *, web=True, estimate=True, model=M
     return result
 
 
+def log_monitoring(sb, company, criteria) -> None:
+    """Writes today's alert log entries for one monitored company, after its summaries are up to date.
+
+    Earlier days are never changed; a repeated check on the same day replaces that day's entries.
+    """
+    from redline import alertlog
+    day = alertlog.today()
+    ids = [c["id"] for c in criteria]
+    scores = {s["criterion_id"]: s for s in
+              sb.table("scores").select("*").eq("holding_id", company["id"]).in_("criterion_id", ids).execute().data}
+    findings = sb.table("findings").select("*").eq("holding_id", company["id"]).in_("criterion_id", ids).execute().data
+    earlier = sb.table("alert_log").select("*").eq("holding_id", company["id"]).eq("origin", "monitoring") \
+        .lt("day", day.isoformat()).execute().data
+    previous = {}
+    for r in sorted(earlier, key=lambda r: r["day"]):
+        previous[r["criterion_id"]] = r["status"]
+    rows = alertlog.monitoring_rows(company, criteria, scores, findings, previous, day)
+    sb.table("alert_log").delete().eq("holding_id", company["id"]).eq("origin", "monitoring") \
+        .eq("day", day.isoformat()).in_("criterion_id", ids).execute()
+    if rows:
+        sb.table("alert_log").insert(rows).execute()
+
+
 def mark_monitored(sb, company, criteria, result) -> None:
     """Records the monitoring check and whether it found something new for Alerts."""
     from datetime import date

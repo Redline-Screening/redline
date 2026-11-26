@@ -45,8 +45,14 @@ class FakeTable:
         self.match = lambda r: before(r) and r[col] == value
         return self
 
+    def lt(self, col, value):
+        before = self.match
+        self.match = lambda r: before(r) and r[col] < value
+        return self
+
     def in_(self, col, values):
-        self.match = lambda r: r[col] in values
+        before = self.match
+        self.match = lambda r: before(r) and r[col] in values
         return self
 
     def execute(self):

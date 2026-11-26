@@ -53,6 +53,9 @@ criteria (e.g. "0% revenue from military activity"). The app checks for breaches
   boxes (Breaches, Watch), one card per company with one line per criterion (summary,
   number of findings) and "New" for changes in the latest monitoring run. Manual screening
   results stay in Screening and Company Profiles.
+- Alert log: dated entries per company and criterion (Breach or Watch) for each monitoring
+  day, plus provider imports; earlier days are never changed. Alerts groups them by date
+  (Today, Yesterday, date) with a period filter and an .xlsx download. No AI calls.
 - Pages: Overview, Investment Universe, Exclusion Criteria, Data Sources, Screening,
   Company Profiles, Alerts. Daily monitoring runs separately.
 

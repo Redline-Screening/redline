@@ -232,6 +232,8 @@ def results(run) -> None:
             st.success(line)
         if run["message"]:
             st.info(run["message"])
+        if run.get("log_errors"):
+            st.warning(f"Alert log entries could not be saved for {run['log_errors']} checks. The results themselves are saved.")
         if run["left_out"]:
             st.caption(f"Findings left out because their sources did not match or named an outlet without a link: {run['left_out']}.")
         with st.container(horizontal=True):

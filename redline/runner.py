@@ -95,6 +95,11 @@ def _work(run, job, sb, client) -> None:
         result = service.run_check(sb, client, job["company"], job["criteria"], web=run["web"], estimate=run["estimate"], **options)
         covered = [c for c in job["criteria"] if c["id"] in result.scores]
         service.refresh_summaries(sb, client, job["company"], covered)
+        if run.get("kind") == "monitor" and covered:
+            try:
+                service.log_monitoring(sb, job["company"], covered)
+            except Exception:       # the check is saved and paid; only its log entry is missing
+                run["log_errors"] = run.get("log_errors", 0) + 1
         missing = getattr(result, "missing", None) or []
         if missing and not job.get("retry"):
             # The answer left out some criteria: check those again in a separate check.

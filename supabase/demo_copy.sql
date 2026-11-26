@@ -69,6 +69,17 @@ begin
       'criteria', (select coalesce(jsonb_agg(c.new_id), '[]'::jsonb) from map_c c where c.old_id::text = any (a.criteria))))).*
     from public.alerts a join map_f m on m.old_id = a.finding_id;
 
+  -- Alert log (migration 011): entries of the copied companies, with their dates.
+  if to_regclass('public.alert_log') is not null then
+    delete from public.alert_log where user_id = demo;
+    insert into public.alert_log (user_id, day, origin, holding_id, criterion_id, issuer, isin, criterion, status, change,
+                                  severity, summary, sources)
+      select demo, l.day, l.origin, h.new_id, c.new_id, l.issuer, l.isin, l.criterion, l.status, l.change, l.severity,
+             l.summary, l.sources
+      from public.alert_log l join map_h h on h.old_id = l.holding_id left join map_c c on c.old_id = l.criterion_id
+      where l.user_id = src and (l.criterion_id is null or c.new_id is not null);
+  end if;
+
   insert into public.accounts (user_id, daily_limit, read_only) values (demo, 0, true)
   on conflict (user_id) do update set daily_limit = 0, read_only = true;
 end $$;

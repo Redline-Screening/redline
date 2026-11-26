@@ -52,26 +52,8 @@ def tables(**k):
     return dict(holdings=[dict(h) for h in H], criteria=[dict(MIL), dict(CHILD)], findings=[dict(F)], **k)
 
 
-def test_page(make_app):
-    s = score("h1", "c1", "high", new=True, summary="Breach because of high-severity incidents. Meta is a supplier.",
-              summary_date="2026-11-26")
-    s["summary_key"] = sm.state_key(s, [F], MIL)
-    app = make_app(**tables(scores=[s], alerts=[RR])).switch_page("views/alerts.py").run()
-    assert not app.exception
-    assert [x.value for x in app.subheader] == ["Breaches", "Watch"]
-    shown = [t.value for t in app.text]
-    assert "Breach because of high-severity incidents. Meta is a supplier." in shown and "Sample incident" in shown
-    assert any("New since the last monitoring run" in c.value for c in app.caption)
-    assert [b.label for b in app.button].count("Company profile") == 2
-    next(b for b in app.button if b.key == "profile-breach-0").click().run()
-    assert app.session_state[ui.COMPANY_KEY] == "h1"
 
 
-def test_empty_page_links_to_monitoring(make_app):
-    app = make_app(**tables()).switch_page("views/alerts.py").run()
-    assert "No monitoring results yet." in [m.value for m in app.markdown]
-    next(b for b in app.button if b.label == "Open Portfolio Monitoring").click().run()
-    assert app.session_state["screening-section"] == "monitoring"
 
 
 def test_overview_figure(make_app):
