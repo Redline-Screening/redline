@@ -12,8 +12,8 @@ from redline import evidence
 from redline.constants import FINDING_CATEGORIES
 from redline.rules import LEVELS, uses_revenue
 
-MAX_TOKENS = 16000
-MAX_ROUNDS = 4
+MAX_TOKENS = 32000      # thinking counts towards this; only tokens actually produced are billed
+MAX_ROUNDS = 8          # continuations after pause_turn
 MAX_FINDINGS = 10
 MAX_SOURCES = 8
 
@@ -37,6 +37,8 @@ class Usage:
     output_tokens: int = 0
     known: bool = True      # False when a request failed and its cost could not be read
     largest_prompt: int = 0
+    stop_reason: str | None = None
+    rounds: int = 0
 
     def add(self, u):
         prompt = u.input_tokens + (u.cache_creation_input_tokens or 0) + (u.cache_read_input_tokens or 0)
@@ -208,6 +210,7 @@ def ask(client, *, model, prompt, web, max_searches):
             usage.known = False
             raise ScreeningError("The AI service is not reachable. Try again shortly.", usage) from e
         usage.add(reply.usage)
+        usage.stop_reason, usage.rounds = reply.stop_reason, usage.rounds + 1
         for block in reply.content:
             if block.type == "text":
                 text += block.text
@@ -221,7 +224,9 @@ def ask(client, *, model, prompt, web, max_searches):
     if reply.stop_reason == "refusal":
         raise ScreeningError("The AI declined this check.", usage)
     if reply.stop_reason != "end_turn":
-        raise ScreeningError("The AI answer was incomplete. Nothing was saved.", usage)
+        reason = {"max_tokens": "output limit reached", "pause_turn": "search not finished",
+                  "model_context_window_exceeded": "too much search content"}.get(reply.stop_reason, str(reply.stop_reason))
+        raise ScreeningError(f"The AI answer was incomplete ({reason}). Nothing was saved.", usage)
     if web and not succeeded:
         raise ScreeningError("The web search did not return results. Nothing was saved.", usage)
     data = extract_json(text)

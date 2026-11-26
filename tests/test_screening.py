@@ -195,7 +195,7 @@ def api_error(cls, status, message="x"):
     ([reply(text(answer()), s=0)], "did not return results"),
     ([reply(NS(type="web_search_tool_result", content=NS(error_code="unavailable")), text(answer()))], "did not return results"),
     ([reply(search(URL), text(answer(cid="other")))], "did not cover"),
-    ([reply(search(URL), stop="pause_turn")] * 4, "incomplete"),
+    ([reply(search(URL), stop="pause_turn")] * 8, "search not finished"),
 ])
 def test_failures(replies, message):
     with pytest.raises(sc.ScreeningError, match=message) as e:
@@ -310,3 +310,36 @@ def test_corrections_reach_the_alert_without_reopening():
 def test_provider_mode_saves_no_estimate():
     r = run(Fake(reply(search(URL), text(answer()))), estimate=False)
     assert "exposure" not in r.scores["c1"] and "likelihood" in r.scores["c1"]
+
+
+def test_stop_reason_is_recorded_and_named():
+    sb = SB({"id": "t"})
+    with pytest.raises(sc.ScreeningError, match=r"incomplete \(output limit reached\)"):
+        service.run_check(sb, Fake(reply(search(URL), text("{"), stop="max_tokens")), META, [MIL])
+    finish = dict(sb.calls)["finish_ai_check"]
+    assert (finish["p_stop"], finish["p_rounds"], finish["p_status"]) == ("max_tokens", 1, "failed")
+    fake = Fake(reply(search(URL), text(answer())))
+    run(fake)
+    assert fake.requests[0]["max_tokens"] == 32000
+
+
+def test_several_pauses_are_continued():
+    fake = Fake(*[reply(search(URL), stop="pause_turn")] * 6, reply(text(answer()), s=0))
+    r = run(fake)
+    assert len(fake.requests) == 7 and r.usage.rounds == 7 and r.usage.stop_reason == "end_turn"
+
+
+def test_logging_works_without_migration_007():
+    from postgrest.exceptions import APIError
+
+    class Old(SB):
+        def rpc(self, name, args=None):
+            if name == "finish_ai_check" and "p_stop" in args:
+                def fail():
+                    raise APIError({"code": "PGRST202", "message": "function not found"})
+                return NS(execute=fail)
+            return super().rpc(name, args)
+    sb = Old({"id": "t"})
+    service.run_check(sb, Fake(reply(search(URL), text(answer()))), META, [MIL])
+    finish = [a for n, a in sb.calls if n == "finish_ai_check"]
+    assert len(finish) == 1 and "p_stop" not in finish[0] and finish[0]["p_status"] == "done"

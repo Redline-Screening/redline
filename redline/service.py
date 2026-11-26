@@ -2,6 +2,7 @@
 import uuid
 
 import anthropic
+from postgrest.exceptions import APIError
 
 from redline import screening
 from redline.constants import MODEL_MANUAL, SEARCHES_MANUAL
@@ -72,10 +73,12 @@ def run_check(sb, client, company, criteria, *, web=True, estimate=True, model=M
         raise LimitReached(BUDGET_MESSAGE if ticket.get("reason") == "budget" else LIMIT_MESSAGE)
 
     def finish(status, usage):
-        sb.rpc("finish_ai_check", {
-            "p_id": ticket["id"], "p_status": status, "p_searches": usage.searches, "p_input": usage.input_tokens,
-            "p_output": usage.output_tokens, "p_cost": usage.cost(model),
-        }).execute()
+        args = {"p_id": ticket["id"], "p_status": status, "p_searches": usage.searches, "p_input": usage.input_tokens,
+                "p_output": usage.output_tokens, "p_cost": usage.cost(model)}
+        try:
+            sb.rpc("finish_ai_check", {**args, "p_stop": usage.stop_reason, "p_rounds": usage.rounds}).execute()
+        except APIError:    # database without migration 007
+            sb.rpc("finish_ai_check", args).execute()
 
     try:
         result = screening.screen(client, model=model, company=company, criteria=criteria, scores=scores,

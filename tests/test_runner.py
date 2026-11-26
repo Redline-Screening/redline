@@ -223,3 +223,34 @@ def test_no_incidents_message(make_app, monkeypatch):
         app.run()
     assert list(app.dataframe[0].value["Note"]) == ["No incidents found for A / Military"]
     assert any("No incidents found for A / Military in the latest run." in c.value for c in app.caption)
+
+
+def run_pages(app, steps=8):
+    for _ in range(steps):
+        time.sleep(0.05)
+        app.run()
+    assert not app.exception
+
+
+@pytest.mark.parametrize("fails", [True, False])
+def test_findings_open_on_the_checked_company(make_app, monkeypatch, fails):
+    def check(sb, client, company, criteria, **k):
+        if fails:
+            raise screening.ScreeningError("The AI answer was incomplete (output limit reached). Nothing was saved.")
+        return result_for(company, criteria)
+    monkeypatch.setattr(service, "run_check", check)
+    monkeypatch.setattr(service, "claude", lambda key: None)
+    other = stored(id="f0", holding_id="h2", criterion_id="c1", title="Other company")
+    app = open_page(make_app, findings=[other])
+    assert app.selectbox[0].value == "h2"
+    app.multiselect[0].unselect("c1").run()
+    app.segmented_control[0].set_value("selected").run()
+    app.multiselect[0].select("h1").run()
+    click(app, "Run screening")
+    run_pages(app)
+    assert app.selectbox[0].value == "h1"
+    note = [c.value for c in app.caption if "A / Child labour" in c.value]
+    if fails:
+        assert note == ["Check failed for A / Child labour: The AI answer was incomplete (output limit reached). Nothing was saved."]
+    else:
+        assert note == ["No incidents found for A / Child labour in the latest run."]
