@@ -64,7 +64,7 @@ with st.container(border=True, key="panel-flagged"):
                  "Reason": ", ".join(r["reasons"]), "Revenue %": r["score"].get("exposure") if rules.uses_revenue(r["criterion"]) else None,
                  "Limit %": r["criterion"]["threshold"], "Likelihood": r["score"].get("likelihood"),
                  "Controversy": (rules.controversy_level(r["score"]) or "").capitalize(),
-                 "Source": r["score"].get("source")}
+                 "Source": rules.revenue_source(r["score"]) if rules.uses_revenue(r["criterion"]) else None}
                 for r in data["flagged"]
             ]).astype({"Weight %": float, "Revenue %": float, "Limit %": float, "Likelihood": float})),
             hide_index=True, placeholder="",

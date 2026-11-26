@@ -30,6 +30,10 @@ class FakeTable:
         self.op, self.records, self.keys = "upsert", records, ["id"]
         return self
 
+    def update(self, values):
+        self.op, self.values = "update", values
+        return self
+
     def delete(self):
         self.op = "delete"
         return self
@@ -51,6 +55,10 @@ class FakeTable:
                     rec.setdefault("id", f"new{len(self.rows)}")
                 old = next((r for r in self.rows if all(r.get(k) == rec.get(k) for k in self.keys)), None)
                 old.update(rec) if old else self.rows.append(rec)
+        elif self.op == "update":
+            for r in self.rows:
+                if self.match(r):
+                    r.update(self.values)
         elif self.op == "delete":
             self.rows[:] = [r for r in self.rows if not self.match(r)]
         data = [dict(r) for r in self.rows if self.match(r)]

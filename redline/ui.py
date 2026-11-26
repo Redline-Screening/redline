@@ -5,6 +5,7 @@ from urllib.parse import urlsplit
 import streamlit as st
 
 from redline.constants import FINDING_CATEGORIES
+from redline.evidence import EVIDENCE, INVOLVEMENT, LEGAL
 from redline.rules import LABELS
 
 # Containers with a key starting "panel" are drawn as white panels.
@@ -102,12 +103,21 @@ def next_step(page: str, title: str) -> None:
 def finding_date(finding) -> str:
     if not finding.get("date"):
         return "Date unknown"
-    return f"{'Event' if finding.get('date_type') == 'event' else 'Reported'}: {finding['date']}"
+    shown = finding["date"][:{"year": 4, "month": 7}.get(finding.get("date_precision"), 10)]
+    return f"{'Event' if finding.get('date_type') == 'event' else 'Reported'}: {shown}"
 
 
-def incident_card(key, title, facts, summary, sources) -> None:
+def evidence_facts(finding) -> list[str]:
+    if not finding.get("involvement"):
+        return ["Not classified"]
+    return [INVOLVEMENT[finding["involvement"]], EVIDENCE.get(finding.get("evidence"), ""), LEGAL.get(finding.get("legal_status"), "")]
+
+
+def incident_card(key, title, facts, summary, sources, action=None, mark=None) -> None:
     """Titles, summaries and links come from AI, sources or users: shown as plain text, never as markup."""
     with st.container(border=True, key=f"panel-incident-{key}"):
+        if mark:
+            st.badge(mark, color="blue")
         st.text(title)
         st.caption(" | ".join(re.sub(r"([\\`*_{}\[\]()#+!|<>~$:])", r"\\\1", x) for x in facts if x))
         if summary:
@@ -117,11 +127,14 @@ def incident_card(key, title, facts, summary, sources) -> None:
                 if re.match(r"https?://", source["url"], re.I):
                     host = re.sub(r"[^a-z0-9.-]", "", urlsplit(source["url"]).netloc.lower().removeprefix("www."))
                     st.link_button(host or "Source", source["url"], type="tertiary")
+            if action and st.button("Dismiss", key=f"dismiss-{key}", type="tertiary"):
+                action()
 
 
-def finding_card(finding) -> None:
+def finding_card(finding, action=None, mark=None) -> None:
     incident_card(
         finding["id"], finding["title"],
-        [f"Severity: {finding['severity']}", FINDING_CATEGORIES.get(finding["category"], "Other"), finding_date(finding)],
-        finding["summary"], finding["sources"],
+        [f"Severity: {finding['severity']}", FINDING_CATEGORIES.get(finding["category"], "Other"), finding_date(finding),
+         *evidence_facts(finding)],
+        finding["summary"], finding["sources"], action, mark,
     )

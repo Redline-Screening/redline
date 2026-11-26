@@ -25,6 +25,17 @@ criteria (e.g. "0% revenue from military activity"). The app checks for breaches
   "Date unknown"), a severity (low/medium/high/severe) and source links that appeared
   in the search results. The controversy level is the highest severity among open
   findings. A later search that finds nothing never lowers it; dismissing a finding does.
+- AI revenue estimates cause a breach only if a linked source gives the share, or the
+  activity's revenue and total revenue for the same year. Otherwise WATCH, labelled
+  "Unsourced estimate". A single contract value is not a revenue figure.
+- Each finding states involvement (company, supplier, partner, unclear), evidence
+  (proven, alleged) and legal status. Maximum severity, enforced in code: dismissed
+  case low; involvement unclear medium; company alleged or case open high, settled
+  without admission medium, proven severe; supplier or partner alleged medium, proven high.
+  Severity is lowered only by a new check that finds a source establishing these.
+- Summaries state only what the linked sources say. The first sentence states what
+  happened or what is alleged and by whom. Outlets are named only if linked.
+- Dates are shown as exact as known (day, month or year), as Event or Reported.
 - Alerts: every finding at medium or above creates one alert with company, criterion,
   summary, date and sources. It reopens if the severity rises.
 - Pages: Overview, Investment Universe, Exclusion Criteria, Data Sources, Screening,

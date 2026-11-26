@@ -25,7 +25,8 @@ def join(alerts, findings, holdings, criteria) -> list[dict]:
             "id": a["id"], "title": a["title"], "summary": a.get("summary"), "severity": a["severity"], "status": a["status"],
             "companies": companies, "criteria": [labels[i] for i in a.get("criteria") or [] if i in labels],
             "criterion_ids": a.get("criteria") or [], "date": a.get("date"),
-            "date_type": (f.get("date_type") or "reported") if f else None, "category": f["category"] if f else None,
+            "date_type": (f.get("date_type") or "reported") if f else None, "category": f["category"] if f else None, "finding": f,
+            "date_precision": f.get("date_precision") if f else None,
             "sources": f["sources"] if f else [{"url": url}] if url else [], "origin": a.get("source"),
         })
     return sorted(out, key=lambda a: a["date"] or "", reverse=True)

@@ -3,7 +3,7 @@ import httpx
 import streamlit as st
 from postgrest.exceptions import APIError
 
-from redline import auth
+from redline import auth, service
 
 _PAGE = 1000
 
@@ -133,3 +133,12 @@ def findings() -> list[dict]:
 def ai_status() -> dict:
     """Remaining AI checks: {user, global, budget, remaining}."""
     return _run(auth.client().rpc("ai_status"))
+
+
+def dismiss_finding(finding: dict) -> None:
+    if is_read_only():
+        raise DataError(READ_ONLY)
+    try:
+        service.dismiss(auth.client(), finding)
+    except (APIError, httpx.HTTPError) as e:
+        raise DataError("The finding could not be dismissed completely. Try again.") from e

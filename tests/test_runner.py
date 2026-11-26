@@ -44,7 +44,7 @@ def test_no_check_runs_twice(monkeypatch):
     def check(sb, client, company, criteria, **k):
         seen.append(company["name"])
         gate.wait(5)
-        return NS(new=[1], alerts=[])
+        return result_for(company, criteria, new=[{"id": "x", "criterion_id": criteria[0]["id"]}])
     monkeypatch.setattr(service, "run_check", check)
     run = make()
     first = runner.start_next(run, None, None)
@@ -108,7 +108,7 @@ def test_estimate_and_limit(make_app):
 
 def test_run_to_the_end(make_app, monkeypatch):
     def check(sb, client, company, criteria, **k):
-        return NS(new=[1], alerts=[1])
+        return NS(**{**vars(result_for(company, criteria, new=[{"id": "x", "criterion_id": "c1"}])), "alerts": [1]})
     monkeypatch.setattr(service, "run_check", check)
     monkeypatch.setattr(service, "claude", lambda key: None)
     app = open_page(make_app)
@@ -125,9 +125,9 @@ def test_run_to_the_end(make_app, monkeypatch):
 def test_leaving_the_page_pauses(make_app, monkeypatch):
     gate = threading.Event()
 
-    def check(*a, **k):
+    def check(sb, client, company, criteria, **k):
         gate.wait(5)
-        return NS(new=[], alerts=[])
+        return result_for(company, criteria)
     monkeypatch.setattr(service, "run_check", check)
     monkeypatch.setattr(service, "claude", lambda key: None)
     app = open_page(make_app)
@@ -152,3 +152,74 @@ def test_findings_are_shown(make_app):
     assert "Title *x*" in [t.value for t in app.text]
     assert any("Reported: 2026-05-18" in c.value.replace("\\", "") for c in app.caption)
     assert list(app.dataframe[0].value["Status"]) == ["Breach"]
+
+
+# Latest run
+from test_screening import stored  # noqa: E402
+
+
+def result_for(company, criteria, new=(), updated=(), before=None, known=(), scores=None):
+    return NS(new=list(new), updated=list(updated), alerts=[], left_out=0, before=before or {}, known=list(known),
+              scores=scores or {c["id"]: {} for c in criteria})
+
+
+def test_check_records():
+    job = {"company": {"id": "h2", "name": "B"}, "criteria": [C1, C2]}
+    r = result_for(job["company"], job["criteria"], new=[{"id": "n1", "criterion_id": "c1"}],
+                   updated=[{"id": "f1", "criterion_id": "c1"}], known=[stored(), stored(id="f9")],
+                   scores={"c1": {"controversy": {"level": "high"}}, "c2": {"controversy": {"level": "none"}}})
+    a, b = runner.check_records(job, r)
+    assert (a["before"], a["after"], a["new"], a["updated"], a["unchanged"]) == ("na", "breach", ["n1"], ["f1"], 1)
+    assert (b["before"], b["after"], b["new"], b["updated"]) == ("na", "clear", [], [])
+    assert runner.check_records(job, error="x")[0]["error"] == "x"
+
+
+def test_latest_run_on_the_page(make_app, monkeypatch):
+    f_new = stored(id="n1", holding_id="h2", criterion_id="c1", title="Fresh finding", severity="medium")
+    f_old = stored(id="f0", holding_id="h1", criterion_id="c1", title="Other company", severity="high")
+    f_low = stored(id="f5", holding_id="h2", criterion_id="c1", title="Older high finding", severity="high")
+
+    def check(sb, client, company, criteria, **k):
+        c = criteria[0]
+        new = [f_new] if (company["id"], c["id"]) == ("h2", "c1") else []
+        return result_for(company, criteria, new=new, scores={c["id"]: {"controversy": {"level": "medium" if new else "none"}}})
+    monkeypatch.setattr(service, "run_check", check)
+    monkeypatch.setattr(service, "claude", lambda key: None)
+    s1 = {"holding_id": "h1", "criterion_id": "c1", "exposure": 0, "exposure_kind": "analyst", "controversy": {"level": "none"}}
+    s2 = {"holding_id": "h2", "criterion_id": "c1", "controversy": {"level": "medium", "checked": "2026-11-26"}}
+    app = open_page(make_app, findings=[f_old, f_new, f_low], scores=[s1, s2])
+    app.multiselect[0].unselect("c2").run()
+    app.segmented_control[0].set_value("selected").run()
+    app.multiselect[0].select("h2").run()
+    app.checkbox[0].uncheck().run()
+    click(app, "Run screening")
+    for _ in range(8):
+        time.sleep(0.05)
+        app.run()
+    assert not app.exception
+    latest = app.dataframe[0].value
+    assert list(latest["Change"]) == ["Not screened → Watch"]
+    assert list(latest["New findings"]) == [1]
+    results = app.dataframe[1].value
+    assert list(results["Company"]) == ["B"]
+    app.toggle[0].set_value(True).run()
+    assert sorted(app.dataframe[1].value["Company"]) == ["A", "B"]
+    assert app.selectbox[0].value == "h2"
+    titles = [t.value for t in app.text if t.value in ("Fresh finding", "Older high finding")]
+    assert titles == ["Fresh finding", "Older high finding"]
+    assert any("badge[New]" in m.value for m in app.markdown)
+
+
+def test_no_incidents_message(make_app, monkeypatch):
+    monkeypatch.setattr(service, "run_check", lambda sb, client, company, criteria, **k: result_for(company, criteria))
+    monkeypatch.setattr(service, "claude", lambda key: None)
+    app = open_page(make_app)
+    app.multiselect[0].unselect("c2").run()
+    app.segmented_control[0].set_value("selected").run()
+    app.multiselect[0].select("h1").run()
+    click(app, "Run screening")
+    for _ in range(8):
+        time.sleep(0.05)
+        app.run()
+    assert list(app.dataframe[0].value["Note"]) == ["No incidents found for A / Military"]
+    assert any("No incidents found for A / Military in the latest run." in c.value for c in app.caption)

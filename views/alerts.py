@@ -46,7 +46,7 @@ for e in shown[:limit]:
     ui.incident_card(
         e["id"], e["title"],
         [", ".join(e["companies"]), ", ".join(e["criteria"]) or "No criterion", f"Severity: {e['severity']}",
-         FINDING_CATEGORIES.get(e["category"]), date, e["origin"], f"Status: {e['status']}"],
+         FINDING_CATEGORIES.get(e["category"]), date, *(ui.evidence_facts(e["finding"]) if e["finding"] else []), e["origin"], f"Status: {e['status']}"],
         e["summary"], e["sources"],
     )
 if len(shown) > limit and st.button("Show more"):

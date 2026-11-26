@@ -77,13 +77,13 @@ TEMPLATES = [
     {
         "key": "child-labour", "type": "conduct", "label": "Child labour",
         "description": "Child labour in own operations or the supply chain.",
-        "threshold": None, "watch_at": 40, "controversy_limit": "medium",
+        "threshold": None, "watch_at": 40, "controversy_limit": "high",
         "keywords": ["child labour", "child labor", "underage worker", "minors"],
     },
     {
         "key": "forced-labour", "type": "conduct", "label": "Forced labour",
         "description": "Forced, bonded or trafficked labour in own operations or the supply chain.",
-        "threshold": None, "watch_at": 40, "controversy_limit": "medium",
+        "threshold": None, "watch_at": 40, "controversy_limit": "high",
         "keywords": ["forced labour", "forced labor", "modern slavery", "human trafficking", "uyghur"],
     },
     {

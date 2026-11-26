@@ -52,7 +52,8 @@ class Fake:
 
 def finding(**k):
     return {"known_id": None, "category": "contract", "title": "Army headset contract", "summary": "Partnership.",
-            "date": "2025-09-01", "severity": "high", "urls": [URL], **k}
+            "date": "2025-09-01", "severity": "high", "urls": [URL], "involvement": "company", "evidence": "proven",
+            "legal_status": "none", **k}
 
 
 def answer(*findings, cid="c1", **k):

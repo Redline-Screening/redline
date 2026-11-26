@@ -7,7 +7,7 @@ import threading
 from datetime import date, timedelta
 
 from redline import screening, service
-from redline.rules import uses_revenue
+from redline.rules import evaluate, uses_revenue
 
 
 def build_jobs(companies, criteria, scores, *, web, skip_days=0, today=None) -> list[dict]:
@@ -27,13 +27,31 @@ def build_jobs(companies, criteria, scores, *, web, skip_days=0, today=None) -> 
 
 
 def new_run(jobs, *, web, estimate) -> dict:
-    return {"jobs": list(jobs), "total": len(jobs), "done": 0, "findings": 0, "alerts": 0, "errors": [], "failures": 0,
+    return {"jobs": list(jobs), "total": len(jobs), "done": 0, "findings": 0, "alerts": 0, "left_out": 0, "checks": [], "errors": [], "failures": 0,
             "current": None, "active": True, "message": None, "web": web, "estimate": estimate, "lock": threading.Lock()}
 
 
 def label(job) -> str:
     names = ", ".join(c["label"] for c in job["criteria"])
     return f"{job['company']['name']} – {names}"
+
+
+def check_records(job, result=None, error=None) -> list[dict]:
+    """What one check changed, per criterion: status before and after, and its findings."""
+    out = []
+    for c in job["criteria"]:
+        entry = {"company_id": job["company"].get("id"), "company": job["company"]["name"], "criterion_id": c["id"],
+                 "criterion": c["label"], "error": error, "new": [], "updated": [], "unchanged": 0, "before": None, "after": None}
+        if result is not None:
+            old = (result.before or {}).get(c["id"])
+            entry["before"] = evaluate(old, c)["state"]
+            entry["after"] = evaluate({**(old or {}), **result.scores.get(c["id"], {})}, c)["state"]
+            entry["new"] = [f["id"] for f in result.new if f["criterion_id"] == c["id"]]
+            entry["updated"] = [f["id"] for f in result.updated if f["criterion_id"] == c["id"]]
+            seen = set(entry["updated"])
+            entry["unchanged"] = sum(f["criterion_id"] == c["id"] and f["id"] not in seen for f in result.known)
+        out.append(entry)
+    return out
 
 
 def start_next(run, sb, client) -> threading.Thread | None:
@@ -58,11 +76,14 @@ def _work(run, job, sb, client) -> None:
         run["failures"] = 0
         run["findings"] += len(result.new)
         run["alerts"] += len(result.alerts)
+        run["left_out"] += result.left_out
+        run["checks"] += check_records(job, result)
     except service.LimitReached as e:
         run["jobs"].insert(0, job)
         run["message"], run["active"] = str(e), False
     except screening.ScreeningError as e:
         run["errors"].append(f"{label(job)}: {e}")
+        run["checks"] += check_records(job, error=str(e))
         run["failures"] += 1
         if run["failures"] >= 2:    # avoid paying for a series of failures
             run["message"], run["active"] = "The screening was stopped after two failed checks in a row.", False

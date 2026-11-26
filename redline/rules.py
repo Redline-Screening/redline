@@ -23,6 +23,20 @@ def uses_revenue(criterion) -> bool:
     return criterion.get("type") != "conduct"
 
 
+def is_unsourced(score) -> bool:
+    """AI revenue estimate without a source for the figure. It can cause Watch, never Breach."""
+    return str((score or {}).get("exposure_kind") or "").startswith("ai") and not score.get("exposure_sourced")
+
+
+def revenue_source(score) -> str | None:
+    score = score or {}
+    if score.get("exposure") is None:
+        return None
+    if str(score.get("exposure_kind") or "").startswith("ai"):
+        return "Unsourced estimate" if is_unsourced(score) else "AI estimate, sourced"
+    return score.get("source")
+
+
 def evaluate(score, criterion) -> dict:
     """Status of one company for one criterion: {state, reasons}."""
     score = score or {}
@@ -33,7 +47,9 @@ def evaluate(score, criterion) -> dict:
     watch_at = 50 if criterion.get("watch_at") is None else criterion["watch_at"]
 
     reasons = []
-    if exposure is not None and exposure > threshold:
+    above = exposure is not None and exposure > threshold
+    unsourced = is_unsourced(score)
+    if above and not unsourced:
         reasons.append("Revenue")
     if _rank(level) >= _rank(breach_level(criterion)):
         reasons.append("Controversy")
@@ -41,6 +57,8 @@ def evaluate(score, criterion) -> dict:
         return {"state": "breach", "reasons": reasons}
     if _rank(level) >= _rank("medium"):
         reasons.append("Controversy")
+    if above and unsourced:
+        reasons.append("Unsourced estimate")
     if likelihood is not None and likelihood >= watch_at:
         reasons.append("Likelihood")
     if reasons:

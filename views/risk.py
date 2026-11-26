@@ -31,7 +31,7 @@ with st.container(border=True, key="panel-company"):
              "Limit %": r["criterion"]["threshold"],
              "Likelihood": (r["score"] or {}).get("likelihood"),
              "Controversy": (rules.controversy_level(r["score"]) or "").capitalize(),
-             "Source": (r["score"] or {}).get("source"), "Date": (r["score"] or {}).get("exposure_date")}
+             "Source": rules.revenue_source(r["score"]) if rules.uses_revenue(r["criterion"]) else None, "Date": (r["score"] or {}).get("exposure_date")}
             for r in result["results"]
         ]).astype({"Revenue %": float, "Limit %": float, "Likelihood": float})),
         hide_index=True, placeholder="",

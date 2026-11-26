@@ -29,14 +29,16 @@ def alert_record(finding, company) -> dict:
 
 
 def save_result(sb, company, result) -> None:
-    fields = ("id", "holding_id", "criterion_id", "category", "title", "summary", "date", "date_type", "severity", "sources",
+    fields = ("id", "holding_id", "criterion_id", "category", "title", "summary", "date", "date_type", "date_precision", "severity", "involvement", "evidence",
+              "legal_status", "sources",
               "status", "first_seen", "last_seen")
     for f in result.new:
         f["id"] = str(uuid.uuid4())
         f["holding_id"] = company["id"]
     for f in result.updated:
         f.setdefault("date_type", "reported")
-    records = [{k: f[k] for k in fields} for f in [*result.new, *result.updated]]
+        f.setdefault("date_precision", "day")
+    records = [{k: f.get(k) for k in fields} for f in [*result.new, *result.updated]]
     if records:
         sb.table("findings").upsert(records, on_conflict="id").execute()
     if result.alerts:
@@ -44,8 +46,11 @@ def save_result(sb, company, result) -> None:
     raised = {f["id"] for f in result.alerts}
     for f in result.updated:    # corrected text reaches an existing alert without reopening it
         if f["id"] not in raised:
-            sb.table("alerts").update({"title": f["title"], "summary": f["summary"], "date": f["date"]}) \
+            sb.table("alerts").update({"title": f["title"], "summary": f["summary"], "date": f["date"], "severity": f["severity"]}) \
                 .eq("finding_id", f["id"]).execute()
+            if screening.LEVELS.index(f["severity"]) < screening.LEVELS.index("medium"):
+                sb.table("alerts").update({"status": "reviewed"}).eq("finding_id", f["id"]) \
+                    .in_("status", ["new", "escalated"]).execute()
     for cid, columns in result.scores.items():
         if columns:
             sb.table("scores").upsert([{"holding_id": company["id"], "criterion_id": cid, **columns}],
@@ -80,4 +85,18 @@ def run_check(sb, client, company, criteria, *, web=True, estimate=True, model=M
         raise
     finish("done", result.usage)
     save_result(sb, company, result)
+    result.before, result.known = scores, findings
     return result
+
+
+def dismiss(sb, finding) -> None:
+    """Dismisses a finding and its alert, and recalculates the incident level."""
+    pair = {"holding_id": finding["holding_id"], "criterion_id": finding["criterion_id"]}
+    sb.table("findings").update({"status": "dismissed"}).eq("id", finding["id"]).execute()
+    sb.table("alerts").update({"status": "dismissed"}).eq("finding_id", finding["id"]).execute()
+    rest = sb.table("findings").select("*").eq("holding_id", pair["holding_id"]).eq("criterion_id", pair["criterion_id"]).execute().data
+    scores = sb.table("scores").select("*").eq("holding_id", pair["holding_id"]).eq("criterion_id", pair["criterion_id"]).execute().data
+    if scores:
+        checked = (scores[0].get("controversy") or {}).get("checked")
+        sb.table("scores").update({"controversy": screening.controversy(rest, checked)}) \
+            .eq("holding_id", pair["holding_id"]).eq("criterion_id", pair["criterion_id"]).execute()
