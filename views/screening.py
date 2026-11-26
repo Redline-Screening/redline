@@ -218,6 +218,7 @@ if not running:
             st.subheader("Findings", anchor=False)
             names = {h["id"]: h["name"] for h in with_findings}
             selected = st.selectbox("Company", list(names), format_func=names.get, key="findings-company")
+            ui.company_link(selected, "View all findings", key="findings-profile")
             shown = [f for f in findings if f["holding_id"] == selected and f["status"] == "open"]
             for c in active:
                 mine = sorted((f for f in shown if f["criterion_id"] == c["id"]),

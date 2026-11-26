@@ -7,7 +7,7 @@ import threading
 from datetime import date, timedelta
 
 from redline import screening, service
-from redline.rules import evaluate, uses_revenue
+from redline.rules import evaluate, revenue_source, uses_revenue
 
 
 def build_jobs(companies, criteria, scores, *, web, skip_days=0, today=None) -> list[dict]:
@@ -41,11 +41,15 @@ def check_records(job, result=None, error=None) -> list[dict]:
     out = []
     for c in job["criteria"]:
         entry = {"company_id": job["company"].get("id"), "company": job["company"]["name"], "criterion_id": c["id"],
-                 "criterion": c["label"], "error": error, "new": [], "updated": [], "unchanged": 0, "before": None, "after": None}
+                 "criterion": c["label"], "error": error, "new": [], "updated": [], "unchanged": 0, "before": None, "after": None,
+                 "exposure": None, "revenue_source": None}
         if result is not None:
             old = (result.before or {}).get(c["id"])
             entry["before"] = evaluate(old, c)["state"]
-            entry["after"] = evaluate({**(old or {}), **result.scores.get(c["id"], {})}, c)["state"]
+            after = {**(old or {}), **result.scores.get(c["id"], {})}
+            entry["after"] = evaluate(after, c)["state"]
+            if uses_revenue(c) and "exposure" in result.scores.get(c["id"], {}):
+                entry["exposure"], entry["revenue_source"] = after["exposure"], revenue_source(after)
             entry["new"] = [f["id"] for f in result.new if f["criterion_id"] == c["id"]]
             entry["updated"] = [f["id"] for f in result.updated if f["criterion_id"] == c["id"]]
             seen = set(entry["updated"])
@@ -72,6 +76,7 @@ def start_next(run, sb, client) -> threading.Thread | None:
 def _work(run, job, sb, client) -> None:
     try:
         result = service.run_check(sb, client, job["company"], job["criteria"], web=run["web"], estimate=run["estimate"])
+        service.refresh_summaries(sb, client, job["company"], job["criteria"])
         run["done"] += 1
         run["failures"] = 0
         run["findings"] += len(result.new)

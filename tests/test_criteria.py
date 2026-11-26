@@ -82,9 +82,9 @@ def test_changing_type():
 
 def test_conduct_form_has_no_revenue_limit(make_app):
     app = make_app().switch_page("views/criteria.py").run()
-    assert [n.label for n in app.number_input] == ["Revenue limit %", "Watch level"]
+    assert [n.label for n in app.number_input] == ["Revenue limit %", "Watch threshold (likelihood of increase)"]
     app.radio[0].set_value("conduct").run()
-    assert [n.label for n in app.number_input] == ["Watch level"]
+    assert [n.label for n in app.number_input] == ["Watch threshold (likelihood of increase)"]
     app.text_input[0].input("Bullying")
     next(b for b in app.button if b.label == "Add criterion").click().run()
     assert not app.exception

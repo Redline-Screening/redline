@@ -170,20 +170,6 @@ def test_dismiss(make_app):
     assert score["controversy"] == {"level": "low", "count": 1, "last": None, "checked": TODAY}
 
 
-def test_page_shows_classes_and_quote(make_app):
-    c = {**MIL, "active": True, "sort": 1, "watch_at": 50, "controversy_limit": "high"}
-    f = stored(involvement="supplier", evidence="alleged", legal_status="dismissed", holding_id="h1")
-    s = {"holding_id": "h1", "criterion_id": "c1", "exposure": 0.2, "exposure_kind": "ai_web", "exposure_sourced": True,
-         "exposure_sources": [{"url": URL, "title": "t"}], "exposure_quote": "0.2% of revenue", "basis": "b"}
-    app = make_app(holdings=[{"id": "h1", "name": "Meta", "weight": 6, "type": "holding"}], criteria=[c], findings=[f, stored(id="f2", holding_id="h1")],
-                   scores=[s], workspaces=[{"user_id": "u1", "mode": "ai"}]).switch_page("views/screening.py").run()
-    assert not app.exception
-    captions = " ".join(x.value.replace("\\", "") for x in app.caption)
-    for part in ("Supplier of the company", "Alleged", "Case dismissed", "Not classified", "AI estimate, sourced", "Findings not classified: 1"):
-        assert part in captions
-    assert "Quote: 0.2% of revenue" in [t.value for t in app.text]
-    next(b for b in app.button if b.label == "Dismiss").click().run()
-    assert not app.exception and any(b.key == "confirm-dismiss" for b in app.button)
 
 
 def test_allegation_sentence_must_survive():

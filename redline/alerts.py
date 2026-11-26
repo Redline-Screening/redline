@@ -16,14 +16,16 @@ def join(alerts, findings, holdings, criteria) -> list[dict]:
     out = []
     for a in alerts:
         f = by_finding.get(a.get("finding_id"))
+        ids = {h.get("ticker") or h["name"]: h["id"] for h in holdings}
         if f and f["holding_id"] in by_id:
-            companies = [by_id[f["holding_id"]]["name"]]
+            companies, holding_ids = [by_id[f["holding_id"]]["name"]], [f["holding_id"]]
         else:
             companies = [names.get(t, t) for t in a.get("tickers") or []]
+            holding_ids = [ids[t] for t in a.get("tickers") or [] if t in ids]
         url = safe_url(a.get("url"))
         out.append({
             "id": a["id"], "title": a["title"], "summary": a.get("summary"), "severity": a["severity"], "status": a["status"],
-            "companies": companies, "criteria": [labels[i] for i in a.get("criteria") or [] if i in labels],
+            "companies": companies, "holding_ids": holding_ids, "criteria": [labels[i] for i in a.get("criteria") or [] if i in labels],
             "criterion_ids": a.get("criteria") or [], "date": a.get("date"),
             "date_type": (f.get("date_type") or "reported") if f else None, "category": f["category"] if f else None, "finding": f,
             "date_precision": f.get("date_precision") if f else None,

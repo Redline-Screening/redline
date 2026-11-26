@@ -15,7 +15,7 @@ criteria (e.g. "0% revenue from military activity"). The app checks for breaches
   - Conduct-based (e.g. child labour): no revenue limit; BREACH if an incident reaches
     the criterion's own breach level (medium, high or severe).
   - WATCH (all types): medium or worse incident below the breach level, or
-    likelihood >= watch level.
+    likelihood >= watch threshold (likelihood of increase).
   - A company is clear only when every active criterion has been screened.
 - Revenue exposure: % of revenue from the excluded activity (AI estimate or provider
   data). Not used for conduct-based criteria.
@@ -28,18 +28,28 @@ criteria (e.g. "0% revenue from military activity"). The app checks for breaches
 - AI revenue estimates cause a breach only if a linked source gives the share, or the
   activity's revenue and total revenue for the same year. Otherwise WATCH, labelled
   "Unsourced estimate". A single contract value is not a revenue figure.
-- Each finding states involvement (company, supplier, partner, unclear), evidence
+- Each finding states involvement (company, indirect = supplier to the party involved,
+  supplier of the company, partner, unclear), evidence
   (proven, alleged) and legal status. Maximum severity, enforced in code: dismissed
   case low; involvement unclear medium; company alleged or case open high, settled
-  without admission medium, proven severe; supplier or partner alleged medium, proven high.
+  without admission medium, proven severe; supplier or partner alleged medium, proven high; indirect alleged low, proven medium.
   Severity is lowered only by a new check that finds a source establishing these.
 - Summaries state only what the linked sources say. The first sentence states what
   happened or what is alleged and by whom. Outlets are named only if linked.
+  Summaries never describe the source format or the AI's reasoning.
+- A finding cites only sources that report that specific event; sources about other events
+  (e.g. another contract) are removed, and a finding without sources is left out.
+- Status summary per company and criterion in Breach or Watch: 2–3 sentences, at most 60
+  words, starting with the actual cause ("Breach because of …"); an unsourced revenue
+  estimate is never presented as a cause of a breach; no internal terms. Generated after
+  saving by a separate Haiku call without web search (about $0.002), only from the saved
+  findings and the revenue source. Regenerated whenever the status basis changes (new check,
+  dismissed finding, provider or analyst figure). Counts towards the manual budget.
 - Dates are shown as exact as known (day, month or year), as Event or Reported.
 - Alerts: every finding at medium or above creates one alert with company, criterion,
   summary, date and sources. It reopens if the severity rises.
 - Pages: Overview, Investment Universe, Exclusion Criteria, Data Sources, Screening,
-  Risk Assessment, Alerts. Daily monitoring runs separately.
+  Company Profiles, Alerts. Daily monitoring runs separately.
 
 ## Stack
 - Streamlit multipage app, deployed on Streamlit Community Cloud.

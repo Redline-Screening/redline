@@ -74,7 +74,8 @@ class FakeClient:
         return FakeTable(self.tables.setdefault(name, []))
 
     def rpc(self, name, args=None):
-        return SimpleNamespace(execute=lambda: SimpleNamespace(data=self.status))
+        # Summaries are never generated in tests that use the full page.
+        return SimpleNamespace(execute=lambda: SimpleNamespace(data=False if name == "can_summarize" else self.status))
 
 
 class FakeAuth:

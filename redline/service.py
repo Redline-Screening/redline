@@ -92,6 +92,16 @@ def run_check(sb, client, company, criteria, *, web=True, estimate=True, model=M
     return result
 
 
+def refresh_summaries(sb, client, company, criteria) -> None:
+    """Brings the status summaries up to date. Problems never affect the saved result."""
+    from redline import summary
+    for c in criteria:
+        try:
+            summary.refresh(sb, client, company, c)
+        except Exception:
+            continue
+
+
 def dismiss(sb, finding) -> None:
     """Dismisses a finding and its alert, and recalculates the incident level."""
     pair = {"holding_id": finding["holding_id"], "criterion_id": finding["criterion_id"]}

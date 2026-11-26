@@ -54,10 +54,15 @@ c.metric("Open alerts", len(open_alerts), border=True,
 d.metric("Fully screened", f"{data['complete']} of {data['held']}", border=True,
          help="Holdings screened against every active criterion.")
 
+with st.container(horizontal=True):
+    st.page_link("views/alerts.py", label="View alerts", icon=":material/arrow_forward:")
+    st.page_link("views/screening.py", label="Run a screening", icon=":material/arrow_forward:")
+
 with st.container(border=True, key="panel-flagged"):
     st.subheader("Breaches and Watch List", anchor=False)
     if data["flagged"]:
-        st.dataframe(
+        st.caption("Select a row to open the company profile.")
+        picked = st.dataframe(
             ui.status_style(pd.DataFrame([
                 {"Company": r["holding"]["name"], "Weight %": r["holding"]["weight"],
                  "Criterion": r["criterion"]["label"], "Status": rules.LABELS[r["state"]],
@@ -74,7 +79,13 @@ with st.container(border=True, key="panel-flagged"):
                 "Limit %": st.column_config.NumberColumn(format="%.1f"),
                 "Likelihood": st.column_config.NumberColumn(format="%.0f"),
             },
+            on_select="rerun", selection_mode="single-row", key="overview-flagged",
         )
+        rows = picked.selection.rows if picked else []
+        if rows:
+            st.session_state.pop("overview-flagged", None)
+            ui._open_company(data["flagged"][rows[0]]["holding"]["id"])
+            st.switch_page("views/company.py")
     elif data["complete"] == data["held"] and data["held"]:
         st.write("No holding is in breach or on watch.")
     else:

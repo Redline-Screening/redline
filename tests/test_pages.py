@@ -7,7 +7,7 @@ PAGES = {
     "criteria": "Exclusion Criteria",
     "sources": "Data Sources",
     "screening": "Screening",
-    "risk": "Risk Assessment",
+    "company": "Company Profile",
     "alerts": "Alerts",
 }
 

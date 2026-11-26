@@ -142,3 +142,13 @@ def dismiss_finding(finding: dict) -> None:
         service.dismiss(auth.client(), finding)
     except (APIError, httpx.HTTPError) as e:
         raise DataError("The finding could not be dismissed completely. Try again.") from e
+
+
+def refresh_summaries(pairs) -> None:
+    """pairs: [(company, criterion)]. Regenerates status summaries after a change; never raises."""
+    key = st.secrets.get("ANTHROPIC_API_KEY")
+    if not key or is_read_only() or not pairs:
+        return
+    with st.spinner("Updating status summaries"):
+        for company, criterion in pairs:
+            service.refresh_summaries(auth.client(), service.claude(key), company, [criterion])

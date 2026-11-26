@@ -123,18 +123,54 @@ def incident_card(key, title, facts, summary, sources, action=None, mark=None) -
         if summary:
             st.text(summary)
         with st.container(horizontal=True):
+            seen = set()
             for source in sources:
-                if re.match(r"https?://", source["url"], re.I):
-                    host = re.sub(r"[^a-z0-9.-]", "", urlsplit(source["url"]).netloc.lower().removeprefix("www."))
-                    st.link_button(host or "Source", source["url"], type="tertiary")
+                url = source["url"]
+                same = re.sub(r"^https?://(www\.)?|[/#?]+$", "", url.lower())
+                if not re.match(r"https?://", url, re.I) or same in seen:
+                    continue
+                seen.add(same)
+                host = re.sub(r"[^a-z0-9.-]", "", urlsplit(url).netloc.lower().removeprefix("www.")) or "Source"
+                title = re.sub(r"\s+", " ", str(source.get("title") or "")).strip()
+                label = f"{host}: {title[:45]}{'...' if len(title) > 45 else ''}" if title and title != url else host
+                st.link_button(md_escape(label), url, type="tertiary")
             if action and st.button("Dismiss", key=f"dismiss-{key}", type="tertiary"):
                 action()
 
 
-def finding_card(finding, action=None, mark=None) -> None:
+STATUS_COLOURS = {"breach": "red", "watch": "orange", "clear": "green", "partial": "gray", "na": "gray"}
+
+
+def status_badge(state) -> None:
+    st.badge(LABELS[state], color=STATUS_COLOURS[state])
+
+
+def finding_card(finding, action=None, mark=None, seen=False) -> None:
+    found = []
+    if seen:
+        found = [f"Found {finding['first_seen']}" if finding.get("first_seen") else "",
+                 f"Last confirmed {finding['last_seen']}" if finding.get("last_seen") else ""]
     incident_card(
         finding["id"], finding["title"],
         [f"Severity: {finding['severity']}", FINDING_CATEGORIES.get(finding["category"], "Other"), finding_date(finding),
-         *evidence_facts(finding)],
+         *evidence_facts(finding), *found],
         finding["summary"], finding["sources"], action, mark,
     )
+
+
+COMPANY_KEY = "company-profile"
+GOTO_KEY = "_goto"
+
+
+def md_escape(text) -> str:
+    return re.sub(r"([\\`*_{}\[\]()#+!|<>~$:-])", r"\\\1", str(text))
+
+
+def _open_company(company_id: str) -> None:
+    st.session_state[COMPANY_KEY] = company_id
+    st.session_state[GOTO_KEY] = "views/company.py"
+
+
+def company_link(company_id: str, label: str, key: str) -> None:
+    """Button that opens the Company Profile of one company."""
+    st.button(label, key=key, type="tertiary", on_click=_open_company, args=(company_id,))

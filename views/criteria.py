@@ -5,7 +5,7 @@ from redline import criteria as rules
 from redline import db, ui
 from redline.constants import CONTROVERSY_LIMITS, TEMPLATES, TYPES, fixed_limit
 
-ui.page_header("Exclusion Criteria", "Revenue limits, incident breach levels and watch levels.")
+ui.page_header("Exclusion Criteria", "Revenue limits, incident breach levels and watch thresholds.")
 ui.show_notice()
 
 state = st.session_state
@@ -64,7 +64,7 @@ def table_panel() -> None:
                 "Incident breach level", options=list(CONTROVERSY_LIMITS), format_func=CONTROVERSY_LIMITS.get,
                 required=True, help="Revenue-based: severe. Both: high or worse (controversial weapons: medium or worse). Conduct-based: own level."),
             "watch_at": st.column_config.NumberColumn(
-                "Watch level", min_value=0, max_value=100, required=True, format="%.0f",
+                "Watch threshold (likelihood of increase)", min_value=0, max_value=100, required=True, format="%.0f",
                 help="Likelihood of rising exposure (0–100) that places a company on watch."),
             "description": st.column_config.TextColumn("Description", width="medium"),
             "keywords": st.column_config.TextColumn("Keywords", width="medium", help="Separated by commas."),
@@ -97,7 +97,7 @@ def template_panel() -> None:
             pd.DataFrame([
                 {"Criterion": t["label"], "Type": TYPES[t["type"]], "Revenue limit %": t["threshold"],
                  "Incident breach level": CONTROVERSY_LIMITS[t["controversy_limit"]],
-                 "Watch level": t["watch_at"], "Description": t["description"]}
+                 "Watch threshold (likelihood of increase)": t["watch_at"], "Description": t["description"]}
                 for k, t in open_templates.items() if k in keys
             ]).astype({"Revenue limit %": float}),
             hide_index=True, placeholder="",
@@ -122,7 +122,7 @@ def custom_panel() -> None:
     else:
         threshold = a.number_input("Revenue limit %", 0.0, 100.0, 0.0, 0.5, key=key("threshold"))
         st.caption(f"Incident breach level: {CONTROVERSY_LIMITS[limit]}.")
-    watch = b.number_input("Watch level", 0, 100, 50, 5, key=key("watch"))
+    watch = b.number_input("Watch threshold (likelihood of increase)", 0, 100, 50, 5, key=key("watch"))
     keywords = st.text_input("Keywords", help="Separated by commas. Used to match provider categories and news.",
                              key=key("keywords"))
     if not st.button("Add criterion"):

@@ -39,11 +39,16 @@ page = st.navigation(
         ],
         "Analysis": [
             st.Page("views/screening.py", title="Screening"),
-            st.Page("views/risk.py", title="Risk Assessment"),
+            st.Page("views/company.py", title="Company Profiles", url_path="company"),
             st.Page("views/alerts.py", title="Alerts"),
         ],
     }
 )
+# Links to a company set the selection and open its profile.
+target = st.session_state.pop(ui.GOTO_KEY, None)
+if target:
+    st.switch_page(target)
+
 # Leaving the Screening page pauses a running screening after its current check.
 run = st.session_state.get("screening_run")
 if run and page.url_path != "screening":

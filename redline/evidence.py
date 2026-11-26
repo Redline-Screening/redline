@@ -5,7 +5,8 @@ from urllib.parse import urlsplit
 
 from redline.rules import LEVELS
 
-INVOLVEMENT = {"company": "Company or subsidiary", "supplier": "Supplier of the company",
+INVOLVEMENT = {"company": "Company or subsidiary", "indirect": "Supplier to the party involved",
+               "supplier": "Supplier of the company",
                "partner": "Partner or investee", "unclear": "Involvement unclear"}
 EVIDENCE = {"proven": "Proven", "alleged": "Alleged"}
 LEGAL = {"none": "No legal case", "open": "Case open", "settled": "Case settled", "dismissed": "Case dismissed",
@@ -27,6 +28,8 @@ def max_severity(involvement, evidence, legal) -> str:
         if legal == "open" or not proven:
             return "high"
         return "severe"
+    if involvement == "indirect":
+        return "medium" if proven else "low"
     if involvement in ("supplier", "partner"):
         return "high" if proven else "medium"
     return "medium"
@@ -102,18 +105,63 @@ def unlinked_outlets(text, sources) -> list[str]:
             if re.search(rf"(?<!\w){re.escape(name)}(?!\w)", str(text)) and not any(domain in h for h in hosts)]
 
 
+# Sentences about the source or the AI's own work, such as "The article is an image page".
+_PROCESS = re.compile(
+    r"\b(?:the|this|that|one|a|an)\s+(?:article|page|source|link|url|search result|result|snippet|image page|photo page|"
+    r"web ?page|press release page)s?\s+(?:(?:is|are|appears? to be|seems? to be)\s+(?:a|an|only)\b|"
+    r"only\s+(?:lists?|mentions?|shows?|gives?|states?)|(?:does|did|do)\s+not\s+(?:mention|give|state|confirm|show|include|"
+    r"specify)|lacks?)\b|\b(?:reporting|publication|publish(?:ed|ing)?) date\b|"
+    r"\bsearch results?\b|\b(?:I|we)\s+(?:found|could|did|searched|was|were|cannot|can't)\b|\bnot (?:found|confirmed) in (?:the )?sources?\b",
+    re.I)
+
+
+def _bad(sentence, sources) -> bool:
+    return bool(unlinked_outlets(sentence, sources) or _PROCESS.search(sentence))
+
+
 def keeps_first_sentence(summary, sources) -> bool:
-    """False when the first sentence, which states the incident or allegation, names an unlinked outlet."""
+    """False when the first sentence, which states the incident or allegation, must be removed."""
     first = _SENTENCE.split(str(summary).strip(), maxsplit=1)[0]
-    return not unlinked_outlets(first, sources)
+    return not _bad(first, sources)
 
 
 def clean_text(title, summary, sources) -> tuple[str, str] | None:
-    """Removes sentences that name an outlet without a link. None: the text cannot be used."""
-    if not title or unlinked_outlets(title, sources):
+    """Removes sentences that name an outlet without a link or describe the source or the AI's work.
+
+    None: the text cannot be used.
+    """
+    if not title or _bad(title, sources):
         return None
-    kept = " ".join(s for s in _SENTENCE.split(summary) if not unlinked_outlets(s, sources)).strip()
+    kept = " ".join(s for s in _SENTENCE.split(summary) if not _bad(s, sources)).strip()
     return (title, kept) if kept else None
+
+
+# ---------- sources of one event ----------
+
+_AMOUNT = re.compile(r"(?:[$€£]|US\$|USD\s?|EUR\s?|CHF\s?)\s?(\d[\d.,]*)\s*(billion|bn|b|million|mn|m|thousand|k)?\b", re.I)
+_SCALE = {"billion": 1000, "bn": 1000, "b": 1000, "million": 1, "mn": 1, "m": 1, "thousand": 0.001, "k": 0.001}
+
+
+def amounts(text) -> set[float]:
+    """Money amounts in millions, such as $618M, $10 billion or EUR 1.2bn."""
+    out = set()
+    for number, unit in _AMOUNT.findall(str(text)):
+        value = _numbers(number)
+        if value:
+            out.add(round(value[0] * _SCALE.get((unit or "").lower(), 0.000001), 3))
+    return out
+
+
+def same_event(finding_text, source_title) -> bool:
+    """False when the source title names only other amounts than the finding, so it reports a different event."""
+    mine, theirs = amounts(finding_text), amounts(source_title)
+    if not mine or not theirs:
+        return True
+    return any(abs(a - b) <= max(0.01, 0.02 * max(a, b)) for a in mine for b in theirs)
+
+
+def event_sources(title, summary, sources) -> list[dict]:
+    return [s for s in sources if same_event(f"{title} {summary}", s.get("title") or "")]
 
 
 # ---------- dates ----------

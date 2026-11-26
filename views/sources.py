@@ -86,6 +86,8 @@ def figures_panel() -> None:
                  help="Select a provider first." if provider_id is None else None):
         try:
             db.save_scores(plan["records"])
+            by_h, by_c = {h["id"]: h for h in holdings}, {c["id"]: c for c in criteria}
+            db.refresh_summaries([(by_h[r["holding_id"]], by_c[r["criterion_id"]]) for r in plan["records"]])
             finish(f"Provider figures imported: {n}.", provider_id, n)
         except db.DataError as e:
             st.error(str(e))

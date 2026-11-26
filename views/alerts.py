@@ -49,6 +49,8 @@ for e in shown[:limit]:
          FINDING_CATEGORIES.get(e["category"]), date, *(ui.evidence_facts(e["finding"]) if e["finding"] else []), e["origin"], f"Status: {e['status']}"],
         e["summary"], e["sources"],
     )
+    for n, hid in enumerate(e["holding_ids"][:1]):
+        ui.company_link(hid, "Company profile", key=f"profile-{e['id']}-{n}")
 if len(shown) > limit and st.button("Show more"):
     st.session_state.alerts_limit = limit + PAGE
     st.rerun()

@@ -24,7 +24,7 @@ def test_changes_are_refused_with_a_message(make_app):
     next(b for b in app.button if b.label == "Add company").click().run()
     assert app.error[0].value == db.READ_ONLY
     assert len(app.session_state["_supabase"].tables["holdings"]) == 1
-    app.switch_page("views/risk.py").run()
+    app.switch_page("views/company.py").run()
     app.number_input[0].set_value(5.0)
     next(b for b in app.button if b.label == "Save assessment").click().run()
     assert app.error[0].value == db.READ_ONLY

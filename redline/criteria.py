@@ -40,7 +40,7 @@ def _validate(record) -> dict:
         record["threshold"] = None
     else:
         record["controversy_limit"] = fixed_limit(record["type"], record["key"])
-    checks = [("watch_at", "Watch level")]
+    checks = [("watch_at", "Watch threshold (likelihood of increase)")]
     if record["type"] != "conduct":
         checks.append(("threshold", "Revenue limit"))
     for field, name in checks:
