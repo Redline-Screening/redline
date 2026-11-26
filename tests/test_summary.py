@@ -181,3 +181,10 @@ def test_new_version_regenerates():
         assert not sm.is_current(row, [], C)
     finally:
         sm.VERSION = old
+
+
+def test_proven_findings_come_first():
+    alleged = stored(id="a", title="Alleged case", severity="high", involvement="company", evidence="alleged", legal_status="open")
+    proven = stored(id="p", title="Proven contract", severity="high", involvement="company", evidence="proven", legal_status="none")
+    prompt = sm.build_prompt(H, C, SCORE, [alleged, proven])
+    assert prompt.index("Proven contract") < prompt.index("Alleged case") and "strongest evidence is a proven finding" in prompt

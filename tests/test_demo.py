@@ -33,6 +33,7 @@ def test_changes_are_refused_with_a_message(make_app):
 def test_no_screening(make_app):
     app = demo(make_app).switch_page("views/screening.py").run()
     assert not app.exception
+    app.multiselect[0].select("h1").run()
     assert app.info[0].value == "AI checks are not available in the demo account."
     assert next(b for b in app.button if b.label == "Run screening").disabled
 

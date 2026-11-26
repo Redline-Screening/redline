@@ -27,7 +27,9 @@ criteria (e.g. "0% revenue from military activity"). The app checks for breaches
   findings. A later search that finds nothing never lowers it; dismissing a finding does.
 - AI revenue estimates cause a breach only if a linked source gives the share, or the
   activity's revenue and total revenue for the same year. Otherwise WATCH, labelled
-  "Unsourced estimate". A single contract value is not a revenue figure.
+  "Unsourced estimate". A single contract value is not a revenue figure. An unsourced
+  estimate below 1% without any open finding is no evidence: it does not cause WATCH and is
+  shown only as information.
 - Each finding states involvement (company, indirect = supplier to the party involved,
   supplier of the company, partner, unclear), evidence
   (proven, alleged) and legal status. Maximum severity, enforced in code: dismissed
@@ -41,7 +43,8 @@ criteria (e.g. "0% revenue from military activity"). The app checks for breaches
   (e.g. another contract) are removed, and a finding without sources is left out.
 - Status summary per company and criterion in Breach or Watch: 2–3 sentences, at most 60
   words, starting with the actual cause ("Breach because of …"); an unsourced revenue
-  estimate is never presented as a cause of a breach; no internal terms. Generated after
+  estimate is never presented as a cause of a breach; no internal terms; proven findings are
+  preferred as the strongest evidence over alleged ones. Generated after
   saving by a separate Haiku call without web search (about $0.002), only from the saved
   findings and the revenue source. Regenerated whenever the status basis changes (new check,
   dismissed finding, provider or analyst figure). Counts towards the manual budget.
@@ -70,7 +73,7 @@ criteria (e.g. "0% revenue from military activity"). The app checks for breaches
 - Show the number of checks before a screening starts ("This will run 20 checks").
 - Demo account: prepared results, read-only, no AI checks.
 - Note on the Screening and sign-in pages: "AI checks are funded privately for this
-  school project and limited per day. Contact victoria.gueissaz@student.unisg.com for a
+  school project and limited per day. Contact victoria.gueissaz@student.unisg.ch for a
   higher limit."
 - Ask before running real, billed checks during development.
 

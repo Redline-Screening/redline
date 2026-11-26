@@ -48,7 +48,7 @@ def check_records(job, result=None, error=None) -> list[dict]:
             entry["before"] = evaluate(old, c)["state"]
             after = {**(old or {}), **result.scores.get(c["id"], {})}
             entry["after"] = evaluate(after, c)["state"]
-            if uses_revenue(c) and "exposure" in result.scores.get(c["id"], {}):
+            if uses_revenue(c) and after.get("exposure") is not None:     # current figure, also if this check kept it
                 entry["exposure"], entry["revenue_source"] = after["exposure"], revenue_source(after)
             entry["new"] = [f["id"] for f in result.new if f["criterion_id"] == c["id"]]
             entry["updated"] = [f["id"] for f in result.updated if f["criterion_id"] == c["id"]]
@@ -94,6 +94,7 @@ def _work(run, job, sb, client) -> None:
             run["message"], run["active"] = "The screening was stopped after two failed checks in a row.", False
     except Exception:
         run["errors"].append(f"{label(job)}: the result could not be saved.")
+        run["checks"] += check_records(job, error="The result could not be saved.")
         run["message"], run["active"] = "The screening was stopped because the database did not respond.", False
     finally:
         run["current"] = None

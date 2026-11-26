@@ -23,6 +23,10 @@ def uses_revenue(criterion) -> bool:
     return criterion.get("type") != "conduct"
 
 
+# An unsourced AI estimate below this share, without any open finding, is not evidence of exposure.
+MIN_UNSOURCED = 1.0
+
+
 def is_unsourced(score) -> bool:
     """AI revenue estimate without a source for the figure. It can cause Watch, never Breach."""
     return str((score or {}).get("exposure_kind") or "").startswith("ai") and not score.get("exposure_sourced")
@@ -57,7 +61,8 @@ def evaluate(score, criterion) -> dict:
         return {"state": "breach", "reasons": reasons}
     if _rank(level) >= _rank("medium"):
         reasons.append("Controversy")
-    if above and unsourced:
+    weak = unsourced and exposure is not None and exposure < MIN_UNSOURCED and level in (None, "none")
+    if above and unsourced and not weak:
         reasons.append("Unsourced estimate")
     if likelihood is not None and likelihood >= watch_at:
         reasons.append("Likelihood")

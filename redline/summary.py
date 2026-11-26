@@ -8,7 +8,7 @@ from redline import evidence, rules
 from redline.evidence import EVIDENCE, INVOLVEMENT, LEGAL
 
 MODEL = "claude-haiku-5-5"
-VERSION = "2"           # part of the key: a new version regenerates all summaries
+VERSION = "3"           # part of the key: a new version regenerates all summaries
 MAX_WORDS = 60
 ATTEMPTS = 2
 # Internal terms that do not belong in a summary for investors.
@@ -59,12 +59,15 @@ def build_prompt(company, criterion, score, findings) -> str:
         note = " This estimate has no source and is not a cause of a breach." if kind == "Unsourced estimate" else ""
         lines.append(f"Revenue share: {score['exposure']}% ({kind}); limit {criterion['threshold']}%.{note}")
     lines.append("Open findings:")
-    for f in sorted((f for f in findings if f["status"] == "open"), key=lambda f: -rules.LEVELS.index(f["severity"])):
+    # Proven findings first: they are the strongest evidence.
+    for f in sorted((f for f in findings if f["status"] == "open"),
+                    key=lambda f: (f.get("evidence") != "proven", -rules.LEVELS.index(f["severity"]))):
         roles = ", ".join(x for x in (INVOLVEMENT.get(f.get("involvement") or ""), EVIDENCE.get(f.get("evidence") or ""),
                                       LEGAL.get(f.get("legal_status") or "")) if x) or "not classified"
         lines.append(f"- [{f['severity']}] {f['title']} ({f.get('date') or 'date unknown'}; {roles}): {f['summary']}")
     return (f"Write a status summary for an investor. Use only the facts below. Start with \"{label} because of\" and the cause "
-            "given in the status line, then the company's role and the strongest evidence. Two or three sentences, at most 50 words, "
+            "given in the status line, then the company's role and the strongest evidence. The strongest evidence is a proven finding; "
+            "mention an alleged finding only if no proven finding exists or in addition to one. Two or three sentences, at most 50 words, "
             "in plain professional language. Mention an unsourced revenue estimate only as an unsourced estimate, never as the cause "
             "of a breach. Do not use internal terms such as status, controversy level or driven by, do not name newspapers or other "
             "outlets, and do not describe sources or your reasoning.\n\n" + "\n".join(lines) +

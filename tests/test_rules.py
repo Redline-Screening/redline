@@ -70,3 +70,13 @@ def test_incident_levels_by_type(kind, limit, level, state):
 def test_conduct_ignores_revenue():
     c = {**C, "type": "conduct", "threshold": None}
     assert r.evaluate({"exposure": 90}, c)["state"] == "na"
+
+
+def test_small_unsourced_estimate_without_findings_is_no_evidence():
+    ai = {"exposure_kind": "ai_web"}
+    assert r.evaluate({**ai, "exposure": 0.1}, C)["state"] == "clear"
+    assert r.evaluate({**ai, "exposure": 0.1, "controversy": con("none")}, C)["state"] == "clear"
+    assert r.evaluate({**ai, "exposure": 1.0}, C) == {"state": "watch", "reasons": ["Unsourced estimate"]}
+    assert r.evaluate({**ai, "exposure": 0.1, "controversy": con("low")}, C) == {"state": "watch", "reasons": ["Unsourced estimate"]}
+    assert r.evaluate({**ai, "exposure": 0.1, "exposure_sourced": True}, C)["state"] == "breach"
+    assert r.evaluate({"exposure": 0.1, "exposure_kind": "provider"}, C)["state"] == "breach"
