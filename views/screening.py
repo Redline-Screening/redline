@@ -383,6 +383,8 @@ def portfolio_monitoring() -> None:
                  help="Estimate for one check per company covering all active criteria.")
         st.caption("One check per company covering all active criteria, for incidents since the last monitoring check. "
                    "Results appear on Alerts.")
+        if workspace.get("monitor_last_kind") == "automatic" and workspace.get("monitor_note"):
+            st.caption(f"Last automatic run ({workspace.get('monitor_last_run')}): {workspace['monitor_note']}")
         jobs = runner.monitoring_jobs(chosen, active, scores)[: int(status["global"])]
         if db.is_read_only():
             st.info("AI checks are not available in the demo account.")

@@ -48,7 +48,9 @@ def alert_record(finding, company) -> dict:
     }
 
 
-def save_result(sb, company, result) -> None:
+def save_result(sb, company, result, uid=None) -> None:
+    """uid: set when the job writes with the secret key, where the database cannot fill in the user."""
+    owner = {"user_id": uid} if uid else {}
     fields = ("id", "holding_id", "criterion_id", "category", "title", "summary", "date", "date_type", "date_precision", "severity", "involvement", "evidence",
               "legal_status", "sources",
               "status", "first_seen", "last_seen")
@@ -58,11 +60,11 @@ def save_result(sb, company, result) -> None:
     for f in result.updated:
         f.setdefault("date_type", "reported")
         f.setdefault("date_precision", "day")
-    records = [{k: f.get(k) for k in fields} for f in [*result.new, *result.updated]]
+    records = [{**{k: f.get(k) for k in fields}, **owner} for f in [*result.new, *result.updated]]
     if records:
         sb.table("findings").upsert(records, on_conflict="id").execute()
     if result.alerts:
-        sb.table("alerts").upsert([alert_record(f, company) for f in result.alerts], on_conflict="finding_id").execute()
+        sb.table("alerts").upsert([{**alert_record(f, company), **owner} for f in result.alerts], on_conflict="finding_id").execute()
     raised = {f["id"] for f in result.alerts}
     for f in result.updated:    # corrected text reaches an existing alert without reopening it
         if f["id"] not in raised:
@@ -73,12 +75,12 @@ def save_result(sb, company, result) -> None:
                     .in_("status", ["new", "escalated"]).execute()
     for cid, columns in result.scores.items():
         if columns:
-            sb.table("scores").upsert([{"holding_id": company["id"], "criterion_id": cid, **columns}],
+            sb.table("scores").upsert([{"holding_id": company["id"], "criterion_id": cid, **columns, **owner}],
                                       on_conflict="holding_id,criterion_id").execute()
 
 
 def run_check(sb, client, company, criteria, *, web=True, estimate=True, model=MODEL_MANUAL, max_searches=SEARCHES_MANUAL,
-              kind="manual", since=None):
+              kind="manual", since=None, uid=None):
     """Screens one company against the criteria and saves the result.
 
     Raises LimitReached before anything is spent, or screening.ScreeningError.
@@ -88,13 +90,19 @@ def run_check(sb, client, company, criteria, *, web=True, estimate=True, model=M
               sb.table("scores").select("*").eq("holding_id", company["id"]).in_("criterion_id", ids).execute().data}
     findings = sb.table("findings").select("*").eq("holding_id", company["id"]).in_("criterion_id", ids).execute().data
 
-    ticket = sb.rpc("reserve_monitor_check" if kind == "monitor" else "reserve_ai_check", {"p_model": model}).execute().data
+    if uid:     # the daily job: same limits, called with the secret key for this user
+        ticket = sb.rpc("reserve_monitor_check_for", {"p_uid": uid, "p_model": model}).execute().data
+    else:
+        ticket = sb.rpc("reserve_monitor_check" if kind == "monitor" else "reserve_ai_check", {"p_model": model}).execute().data
     if "id" not in ticket:
         raise LimitReached(BUDGET_MESSAGE if ticket.get("reason") == "budget" else LIMIT_MESSAGE)
 
     def finish(status, usage):
         args = {"p_id": ticket["id"], "p_status": status, "p_searches": usage.searches, "p_input": usage.input_tokens,
                 "p_output": usage.output_tokens, "p_cost": usage.cost(model)}
+        if uid:
+            sb.rpc("finish_ai_check_for", {"p_uid": uid, **args, "p_stop": usage.stop_reason, "p_rounds": usage.rounds}).execute()
+            return
         try:
             sb.rpc("finish_ai_check", {**args, "p_stop": usage.stop_reason, "p_rounds": usage.rounds}).execute()
         except APIError:    # database without migration 007
@@ -108,14 +116,14 @@ def run_check(sb, client, company, criteria, *, web=True, estimate=True, model=M
         finish("failed", e.usage)
         raise
     finish("done", result.usage)
-    save_result(sb, company, result)
+    save_result(sb, company, result, uid)
     result.before, result.known = scores, findings
     if kind == "monitor":
         mark_monitored(sb, company, [c for c in criteria if c["id"] in result.scores], result)
     return result
 
 
-def log_monitoring(sb, company, criteria) -> None:
+def log_monitoring(sb, company, criteria, uid=None) -> None:
     """Writes today's alert log entries for one monitored company, after its summaries are up to date.
 
     Earlier days are never changed; a repeated check on the same day replaces that day's entries.
@@ -135,7 +143,7 @@ def log_monitoring(sb, company, criteria) -> None:
     sb.table("alert_log").delete().eq("holding_id", company["id"]).eq("origin", "monitoring") \
         .eq("day", day.isoformat()).in_("criterion_id", ids).execute()
     if rows:
-        sb.table("alert_log").insert(rows).execute()
+        sb.table("alert_log").insert([{**r, "user_id": uid} if uid else r for r in rows]).execute()
 
 
 def mark_monitored(sb, company, criteria, result) -> None:
@@ -152,12 +160,12 @@ def mark_monitored(sb, company, criteria, result) -> None:
             .eq("holding_id", company["id"]).eq("criterion_id", c["id"]).execute()
 
 
-def refresh_summaries(sb, client, company, criteria) -> None:
+def refresh_summaries(sb, client, company, criteria, uid=None) -> None:
     """Brings the status summaries up to date. Problems never affect the saved result."""
     from redline import summary
     for c in criteria:
         try:
-            summary.refresh(sb, client, company, c)
+            summary.refresh(sb, client, company, c, uid)
         except Exception:
             continue
 

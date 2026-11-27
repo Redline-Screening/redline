@@ -31,3 +31,10 @@ Create an account, run `supabase/migrations/005_read_only_accounts.sql`, then `s
 4. Deploy, then make the app public under **Share** so that classmates can reach the sign-in page.
 
 Every push to `main` updates the app. Secrets never belong in git, and the Supabase secret key is not used by the app.
+
+## Daily monitoring (GitHub Actions)
+
+`.github/workflows/daily-monitoring.yml` runs `monitor.py` every morning at 07:00 Swiss time. It needs three
+repository secrets (Settings → Secrets and variables → Actions): `SUPABASE_URL`, `SUPABASE_SECRET_KEY` and
+`ANTHROPIC_API_KEY`, and `supabase/migrations/016_scheduled_monitoring.sql`. Start it by hand under
+Actions → Daily monitoring → Run workflow. The log shows counts only.

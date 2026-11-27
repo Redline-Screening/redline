@@ -1,0 +1,43 @@
+name: Daily monitoring
+
+on:
+  schedule:
+    # 07:00 Swiss time: 06:00 UTC in winter (CET), 05:00 UTC in summer (CEST).
+    # Both start the job; monitor.py runs only from 07:00 Swiss time and once per day.
+    - cron: "0 5 * * *"
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+    inputs:
+      again:
+        description: "Repeat although today's automatic run is done"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: daily-monitoring
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Run monitoring
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          ARGS=""
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then ARGS="--force"; fi
+          if [ "${{ inputs.again }}" = "true" ]; then ARGS="$ARGS --again"; fi
+          python monitor.py $ARGS

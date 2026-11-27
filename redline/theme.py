@@ -33,8 +33,8 @@ HELP = {
     "Data Sources": "Choose how companies are screened: provider files, AI screening, or both. Provider figures always take "
                     "priority over AI estimates. Next: Screening.",
     "Portfolio Monitoring": "Checks the selected holdings for new incidents once a day, one check per company covering all "
-                            "active criteria. Run now starts the same check immediately, once per day. Results appear on "
-                            "Alerts.",
+                            "active criteria. Run now starts the same check immediately, once per day. The daily run starts at 07:00 Swiss "
+                            "time when Daily monitoring is on. Results appear on Alerts.",
     "Holding Screening": "Checks chosen companies against chosen criteria now, with a new web search per company and "
                          "criterion. The results of the run appear below it; all stored results are in Company Profiles.",
     "Pre-investment Screening": "Checks a company outside the investment universe before you invest, with a new web search "

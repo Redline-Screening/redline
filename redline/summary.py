@@ -102,7 +102,7 @@ def generate(client, company, criterion, score, findings):
     return (cleaned[1] if usable else None), tokens_in, u.output_tokens, cost
 
 
-def refresh(sb, client, company, criterion) -> str | None:
+def refresh(sb, client, company, criterion, uid=None) -> str | None:
     """Regenerates the summary of one company and criterion if the stored one no longer matches.
 
     Returns the summary, or None when none is needed or possible. Never raises for AI problems.
@@ -115,13 +115,18 @@ def refresh(sb, client, company, criterion) -> str | None:
     findings = sb.table("findings").select("*").eq("holding_id", pair["holding_id"]).eq("criterion_id", pair["criterion_id"]).execute().data
     if not needed(score, criterion) or is_current(score, findings, criterion) or client is None:
         return score.get("summary") if is_current(score, findings, criterion) else None
-    if not sb.rpc("can_summarize").execute().data:
+    allowed = sb.rpc("can_summarize_for", {"p_uid": uid}) if uid else sb.rpc("can_summarize")
+    if not allowed.execute().data:
         return None
     text = None
     for _ in range(ATTEMPTS):      # one more attempt if the first summary is not acceptable
         text, tokens_in, tokens_out, cost = generate(client, company, criterion, score, findings)
         if tokens_in or tokens_out:
-            sb.rpc("log_ai_summary", {"p_model": MODEL, "p_input": tokens_in, "p_output": tokens_out, "p_cost": cost}).execute()
+            args = {"p_model": MODEL, "p_input": tokens_in, "p_output": tokens_out, "p_cost": cost}
+            if uid:
+                sb.rpc("log_ai_summary_for", {"p_uid": uid, **args}).execute()
+            else:
+                sb.rpc("log_ai_summary", args).execute()
         if text or not (tokens_in or tokens_out):
             break
     if text:

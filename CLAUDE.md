@@ -87,6 +87,10 @@ criteria (e.g. "0% revenue from military activity"). The app checks for breaches
   check per company covering all active criteria, max 10 checks per day across all
   users, only new incidents since the last monitoring check (first check: last 30 days).
   "Run now" runs the same monitoring once per day per user.
+- Daily run: monitor.py via GitHub Actions at 07:00 Swiss time (two UTC crons; the script
+  starts only from 07:00 and once per day). Uses the Supabase secret key, so it filters
+  every query by user and writes user_id itself; limits via the *_for database functions.
+  Actions logs are public: counts only, no names or addresses.
 - At a limit show "Daily AI limit reached" with the checks used (e.g. 15 of 15) and the reset
   at midnight Swiss time, not an error.
 - Show the number of checks before a screening starts ("This will run 20 checks").
