@@ -8,6 +8,25 @@ from redline import screening
 from redline.constants import MODEL_MANUAL, SEARCHES_MANUAL
 
 LIMIT_MESSAGE = "Daily AI limit reached, try again tomorrow."
+
+
+def until_midnight() -> str:
+    from datetime import datetime, timedelta
+    from zoneinfo import ZoneInfo
+    now = datetime.now(ZoneInfo("Europe/Zurich"))
+    left = datetime.combine(now.date() + timedelta(days=1), datetime.min.time(), now.tzinfo) - now
+    hours, minutes = divmod(int(left.total_seconds()) // 60, 60)
+    return f"{hours} h {minutes} min"
+
+
+def limit_message(status: dict) -> str:
+    """Daily limit with the number of checks used and the reset time."""
+    reset = f"The limit resets at midnight Swiss time (in {until_midnight()})."
+    if "user_limit" in status and int(status.get("user", 1)) < 1:
+        return f"Daily AI limit reached: {status['used']} of {status['user_limit']} checks used today. {reset}"
+    if "global_limit" in status and int(status.get("global", 1)) < 1:
+        return f"Daily AI limit for all users reached: {status['global_limit']} checks today. {reset}"
+    return f"{LIMIT_MESSAGE} {reset}"
 BUDGET_MESSAGE = "The AI budget of this project has been used. Saved results remain available."
 
 

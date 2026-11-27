@@ -56,6 +56,18 @@ criteria (e.g. "0% revenue from military activity"). The app checks for breaches
 - Alert log: dated entries per company and criterion (Breach or Watch) for each monitoring
   day, plus provider imports; earlier days are never changed. Alerts groups them by date
   (Today, Yesterday, date) with a period filter and an .xlsx download. No AI calls.
+- Pre-investment Screening: a company outside the universe is screened and stored as a
+  pre-investment company (type candidate), excluded from the universe, Overview and
+  monitoring, with its own Company Profile; "Add to universe as prospect" converts it.
+- Pre-investment history on its page (pre-investment companies and screened prospects): last check date, criteria, result, first sentence of the
+  summary, decision (Under review, Added as prospect, Rejected; editable), latest note;
+  Excel export. Dated investment notes on the Company Profile of pre-investment companies
+  and prospects. No AI calls.
+- Company search: suggestions from data/companies.csv (large index constituents from
+  Wikipedia, CC BY-SA, see data/SOURCES.md; ISINs only where the source gives them),
+  OpenFIGI as a free fallback for listed companies (names and tickers, no ISINs).
+- Criteria fields in Screening accept a new name; it is created as an inactive criterion
+  with a suggested type and keywords (no AI).
 - Pages: Overview, Investment Universe, Exclusion Criteria, Data Sources, Screening,
   Company Profiles, Alerts. Daily monitoring runs separately.
 
@@ -75,7 +87,8 @@ criteria (e.g. "0% revenue from military activity"). The app checks for breaches
   check per company covering all active criteria, max 10 checks per day across all
   users, only new incidents since the last monitoring check (first check: last 30 days).
   "Run now" runs the same monitoring once per day per user.
-- At a limit show "Daily AI limit reached, try again tomorrow", not an error.
+- At a limit show "Daily AI limit reached" with the checks used (e.g. 15 of 15) and the reset
+  at midnight Swiss time, not an error.
 - Show the number of checks before a screening starts ("This will run 20 checks").
 - Demo account: prepared results, read-only, no AI checks.
 - Note on the Screening and sign-in pages: "AI checks are funded privately for this

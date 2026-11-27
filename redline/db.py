@@ -182,3 +182,21 @@ def alert_log() -> list[dict]:
 def add_log(rows: list[dict]) -> None:
     if rows:
         _write(auth.client().table("alert_log").insert(rows))
+
+
+def notes() -> list[dict]:
+    return _all("company_notes", "created_at", desc=True)
+
+
+def update_note(note_id: str, text: str) -> None:
+    from datetime import datetime, timezone
+    _write(auth.client().table("company_notes").update({"text": text.strip()[:1000],
+                                                         "updated_at": datetime.now(timezone.utc).isoformat()}).eq("id", note_id))
+
+
+def delete_note(note_id: str) -> None:
+    _write(auth.client().table("company_notes").delete().eq("id", note_id))
+
+
+def add_note(holding_id: str, text: str) -> None:
+    _write(auth.client().table("company_notes").insert([{"holding_id": holding_id, "text": text.strip()[:1000]}]))

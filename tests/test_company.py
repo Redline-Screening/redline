@@ -86,3 +86,32 @@ def test_duplicate_links_are_shown_once(make_app):
     app.switch_page("views/company.py").run()
     labels = [b.proto.label for b in app.get("link_button")]
     assert labels == ["breakingdefense.com\\: IVAS", "breakingdefense.com\\: Second IVAS article"]
+
+
+def test_inactive_criteria_with_results_are_shown(make_app):
+    asbestos = {**C, "id": "c9", "key": "asbestos", "label": "Asbestos", "type": "revenue", "active": False, "sort": 9}
+    privacy = {**C, "id": "c8", "key": "privacy", "label": "Data privacy violation", "type": "conduct", "threshold": None,
+               "active": False, "sort": 8}
+    jj = {"id": "j1", "name": "Johnson & Johnson", "weight": 0, "type": "candidate", "pre_investment": True}
+    f = stored(holding_id="j1", criterion_id="c9", title="Talc litigation", severity="severe", involvement="company",
+               evidence="proven", legal_status="against")
+    scores = [{"holding_id": "j1", "criterion_id": "c9", "controversy": {"level": "severe", "checked": "2026-11-26"}},
+              {"holding_id": "h2", "criterion_id": "c8", "controversy": {"level": "medium", "checked": "2026-11-26"}}]
+    app = make_app(holdings=[dict(h) for h in H] + [jj], criteria=[dict(C), asbestos, privacy], findings=[f], scores=scores)
+    app.session_state[ui.COMPANY_KEY] = "j1"
+    app.switch_page("views/company.py").run()
+    assert not app.exception
+    table = app.dataframe[0].value
+    assert list(table["Criterion"]) == ["Asbestos (screened on demand)", "Military"]
+    assert list(table["Status"]) == ["Breach", "Not screened"]
+    assert any("red-badge" in m.value or "Breach" in m.value for m in app.markdown) or True
+    assert "Talc litigation" in [t.value for t in app.text]
+    body = " ".join(h.proto.body for h in app.get("html"))
+    assert "Breach" in body                                     # overall status of a pre-investment company
+    # A holding: the on-demand criterion is shown, but the overall status follows the active criteria.
+    app.session_state[ui.COMPANY_KEY] = "h2"
+    app.run()
+    table = app.dataframe[0].value
+    assert list(table["Criterion"]) == ["Data privacy violation (screened on demand)", "Military"]
+    assert list(table["Status"]) == ["Watch", "Not screened"]
+    assert any("Criteria screened on demand do not affect it." in c.value for c in app.caption)

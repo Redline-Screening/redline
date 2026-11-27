@@ -59,6 +59,7 @@ class FakeTable:
         if self.op == "upsert":
             for rec in self.records:
                 rec = dict(rec)
+                rec.setdefault("created_at", __import__("datetime").datetime.now().isoformat())
                 if self.keys == ["id"]:
                     rec.setdefault("id", f"new{len(self.rows)}")
                 old = next((r for r in self.rows if all(r.get(k) == rec.get(k) for k in self.keys)), None)

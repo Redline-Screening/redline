@@ -10,7 +10,7 @@ ITEMS = [
                      ("Data Sources", "views/sources.py", None)]),
     ("Screening", None, [("Portfolio Monitoring", "views/screening.py", "monitoring"),
                          ("Holding Screening", "views/screening.py", "holding"),
-                         ("Pre-investment Screening", None, "pre")]),
+                         ("Pre-investment Screening", "views/screening.py", "pre")]),
     ("Company Profiles", "views/company.py", None),
     ("Alerts", "views/alerts.py", None),
 ]

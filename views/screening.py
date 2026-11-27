@@ -4,11 +4,11 @@ from datetime import date
 import pandas as pd
 import streamlit as st
 
-from redline import auth, db, rules, runner, service, summary, ui
+from redline import auth, companies as company_list, db, importers, preinvest, rules, runner, service, summary, ui
 from redline import criteria as criteria_rules
-from redline.constants import AI_NOTE, MONITOR_COST, MONITOR_MAX_COMPANIES, TEMPLATES
+from redline.constants import AI_NOTE, CONTROVERSY_LIMITS, MONITOR_COST, MONITOR_MAX_COMPANIES, TEMPLATES, TYPES
 
-_SECTION_TITLES = {"monitoring": "Portfolio Monitoring", "holding": "Holding Screening"}
+_SECTION_TITLES = {"monitoring": "Portfolio Monitoring", "holding": "Holding Screening", "pre": "Pre-investment Screening"}
 # Screening opens on Portfolio Monitoring unless another section was chosen.
 if st.session_state.get("screening-section") not in _SECTION_TITLES:
     st.session_state["screening-section"] = "monitoring"
@@ -93,7 +93,7 @@ def criterion_options():
 
 
 # Widget values are lost while the progress panel replaces the form, so they are kept here.
-FORM = ("hs-companies", "hs-criteria", "hs-method", "hs-skip")
+FORM = ("hs-companies", "hs-criteria", "hs-method", "hs-skip", "pre-company", "pre-isin", "pre-ticker", "pre-criteria")
 
 
 def restore_form() -> None:
@@ -106,6 +106,59 @@ def keep_form() -> None:
     for k in FORM:
         if k in state:
             state[f"_{k}"] = state[k]
+
+
+def _create_criterion(field: str, text: str, slot: str) -> None:
+    """Creates a typed criterion as inactive and puts it in place of the typed text."""
+    try:
+        new = criteria_rules.custom(state[f"{slot}-type"], company_list.suggest_criterion(text)["label"], "",
+                                    None if state[f"{slot}-type"] == "conduct" else 0.0, "high", 50,
+                                    state[f"{slot}-keywords"], criteria)
+        new["active"] = False
+        db.save_criteria([new])
+    except (criteria_rules.CriterionProblem, db.DataError) as e:
+        state["_criteria_error"] = str(e)
+        return
+    state[field] = [new["id"] if x == text else x for x in state[field]]
+    state["_criteria_notice"] = f"Criterion '{new['label']}' created as inactive."
+
+
+def criteria_field(field: str):
+    """Criteria selection. A name that does not exist yet can be typed and created as an inactive criterion.
+
+    Returns the chosen criteria (planned, including standard exclusions to add) and the typed names not yet created.
+    """
+    options = criterion_options()
+    if field not in state:
+        state[field] = [c["id"] for c in criteria if c["active"]]
+    chosen = st.multiselect("Criteria", list(options), format_func=lambda x: options.get(x, x), key=field,
+                            accept_new_options=True, placeholder="Select or type a criterion",
+                            help="Type a name that does not exist yet to create a new criterion.")
+    if "_criteria_error" in state:
+        st.error(state.pop("_criteria_error"))
+    if "_criteria_notice" in state:
+        st.caption(state.pop("_criteria_notice"))
+    pending = [x for x in chosen if x not in options]
+    for n, text in enumerate(pending):
+        slot = f"{field}-new-{n}"
+        suggestion = company_list.suggest_criterion(text)
+        with st.container(border=True, key=f"panel-{slot}"):
+            st.markdown(f"**Create criterion '{ui.md_escape(suggestion['label'])}'**")
+            a, b = st.columns([1, 2])
+            if state.get(f"{slot}-for") != text:      # new suggestion for a new name
+                state[f"{slot}-for"], state[f"{slot}-type"] = text, suggestion["type"]
+                state[f"{slot}-keywords"] = suggestion["keywords"]
+            a.selectbox("Type", list(TYPES), format_func=TYPES.get, key=f"{slot}-type")
+            b.text_input("Keywords", key=f"{slot}-keywords", help="Separated by commas.")
+            st.caption("Saved as an inactive criterion: it does not affect the status of the portfolio. "
+                       + ("Breach level: " + CONTROVERSY_LIMITS["high"] + "." if state[f"{slot}-type"] == "conduct"
+                          else "Revenue limit: 0%. Adjust it in Exclusion Criteria."))
+            st.button("Create criterion", key=f"{slot}-create", on_click=_create_criterion, args=(field, text, slot),
+                      disabled=db.is_read_only())
+    known = [x for x in chosen if x in options]
+    templates = [k.removeprefix("template:") for k in known if k.startswith("template:")]
+    planned = [c for c in criteria if c["id"] in known] + criteria_rules.from_templates(templates, criteria)
+    return known, planned, templates, pending
 
 
 def holding_screening() -> None:
@@ -124,12 +177,7 @@ def holding_screening() -> None:
         picked = st.multiselect("Companies", list(by_id), placeholder="Select companies", key="hs-companies",
                                 format_func=lambda i: by_id[i]["name"] + (" (prospect)" if by_id[i]["type"] == "prospect" else ""))
         companies = [by_id[i] for i in picked]
-        options = criterion_options()
-        if any(i not in options for i in state.get("hs-criteria", [])):
-            state["hs-criteria"] = [i for i in state["hs-criteria"] if i in options]
-        if "hs-criteria" not in state:
-            state["hs-criteria"] = [c["id"] for c in criteria if c["active"]]
-        chosen = st.multiselect("Criteria", list(options), format_func=options.get, key="hs-criteria")
+        chosen, planned, templates, pending = criteria_field("hs-criteria")
         methods = {"web": "Web search"} | ({"quick": "Quick estimate"} if estimate else {})
         if state.get("hs-method") not in methods:
             state["hs-method"] = "web"
@@ -141,18 +189,18 @@ def holding_screening() -> None:
         state.setdefault("hs-skip", True)
         skip = st.checkbox("Exclude combinations checked in the last 7 days", key="hs-skip") if web else False
 
-        templates = [k.removeprefix("template:") for k in chosen if k.startswith("template:")]
-        planned = [c for c in criteria if c["id"] in chosen] + criteria_rules.from_templates(templates, criteria)
         jobs = runner.build_jobs(companies, planned, scores, web=web, skip_days=7 if skip else 0)
-        run_now = jobs[:remaining]
-        if not companies or not chosen:
+        run_now = jobs[:remaining] if not pending else []
+        if pending:
+            st.write("Create or remove the new criterion first.")
+        elif not companies or not chosen:
             st.write("Select at least one company and one criterion.")
         elif not jobs:
             st.write("No checks to run with this selection.")
         elif db.is_read_only():
             st.info("AI checks are not available in the demo account.")
         elif not remaining:
-            st.info(service.BUDGET_MESSAGE if not int(status["budget"]) else service.LIMIT_MESSAGE)
+            st.info(service.BUDGET_MESSAGE if not int(status["budget"]) else service.limit_message(status))
         elif len(jobs) > remaining:
             st.write(f"This selection needs {len(jobs)} checks. {remaining} remaining today: this will run {remaining} checks, "
                      "largest weights first.")
@@ -367,23 +415,217 @@ def record_monitoring(run) -> None:
             run["recorded"] = False
 
 
-SECTIONS = {"monitoring": "Portfolio Monitoring", "holding": "Holding Screening"}
+# ---------- Pre-investment Screening ----------
+
+def add_as_prospect(company_id: str) -> None:
+    try:
+        company = next(h for h in db.holdings(candidates=True) if h["id"] == company_id)
+        db.save_holdings([preinvest.decision_change(company, "prospect")])
+    except (db.DataError, StopIteration):
+        state["_pre_error"] = "The company could not be added."
+        return
+    state["_pre_added"] = company_id
+
+
+def fill_company(listed) -> None:
+    """A suggestion fills ISIN and ticker; free text keeps the fields for manual entry."""
+    picked = state.get("pre-company")
+    if picked in listed:
+        state["pre-isin"], state["pre-ticker"] = listed[picked]["isin"], listed[picked]["ticker"]
+    state.pop("pre-figi", None)
+    state.pop("pre-figi-name", None)
+
+
+def pick_figi(results) -> None:
+    choice = state.get("pre-figi-pick")
+    if choice is not None:
+        state["pre-ticker"], state["pre-figi-name"] = results[choice]["ticker"], results[choice]["name"]
+
+
+def figi_search(text: str) -> None:
+    """Free lookup of listed companies outside the bundled list (OpenFIGI: names and tickers, no ISINs)."""
+    if state.get("pre-figi-for") != text:
+        state["pre-figi-for"], state["pre-figi"] = text, None
+        state.pop("pre-figi-name", None)
+    if state.get("pre-figi") is None:
+        if st.button("Search listed companies", key="pre-figi-search",
+                     help="Searches OpenFIGI for listed companies with this name. Free; returns names and tickers."):
+            state["pre-figi"] = company_list.openfigi(text)
+            st.rerun()
+        return
+    results = state["pre-figi"]
+    if not results:
+        st.caption("No listed company found. The name is used as entered.")
+        return
+    st.radio("Listed companies found", range(len(results)), index=None, key="pre-figi-pick", on_change=pick_figi,
+             args=(results,), format_func=lambda i: " \u00b7 ".join(
+                 x for x in (results[i]["name"], results[i]["ticker"], results[i]["exchange"]) if x))
+    st.caption("OpenFIGI gives no ISIN. Enter it if known.")
+
+
+def pre_investment() -> None:
+    try:
+        scores = rules.index_scores(db.scores())
+        status = db.ai_status()
+        everyone = db.holdings(candidates=True)
+    except db.DataError as e:
+        st.error(str(e))
+        return
+    remaining = int(status["remaining"])
+    restore_form()
+    with st.container(border=True, key="panel-pre"):
+        if "_pre_error" in state:
+            st.error(state.pop("_pre_error"))
+        listed = company_list.suggestions()
+        a, b, c = st.columns([2, 1, 1])
+        picked = a.selectbox("Company", list(listed), index=None, key="pre-company", accept_new_options=True,
+                             placeholder="Type a company name", on_change=fill_company, args=(listed,),
+                             help="Suggestions from a list of large listed companies. Any other name can be entered.")
+        isin = b.text_input("ISIN (optional)", key="pre-isin")
+        ticker = c.text_input("Ticker (optional)", key="pre-ticker")
+        name = listed[picked]["name"] if picked in listed else (picked or "")
+        if picked and picked not in listed:
+            figi_search(picked)
+            if state.get("pre-figi-for") == picked and state.get("pre-figi-name"):
+                name = state["pre-figi-name"]
+        chosen, planned, templates, pending = criteria_field("pre-criteria")
+        name, isin, ticker = name.strip(), isin.strip().upper().replace(" ", ""), ticker.strip().upper()
+        match = importers.find_company(everyone, isin=isin if importers.valid_isin(isin) else "", ticker=ticker, name=name) \
+            if name else None
+        if pending:
+            st.write("Create or remove the new criterion first.")
+        elif isin and not importers.valid_isin(isin):
+            st.error("The ISIN is not valid.")
+        elif match and match["type"] != "candidate":
+            st.info(f"{match['name']} is already in the investment universe. Use Holding Screening.")
+        elif not name or not chosen:
+            st.write("Enter a company and select at least one criterion.")
+        elif db.is_read_only():
+            st.info("AI checks are not available in the demo account.")
+        elif not remaining:
+            st.info(service.BUDGET_MESSAGE if not int(status["budget"]) else service.limit_message(status))
+        else:
+            n = min(len(planned), remaining)
+            st.write(f"This will run {n} {'check' if n == 1 else 'checks'}. {remaining} remaining today.")
+        ready = bool(name and chosen and not pending and remaining and key and not db.is_read_only()
+                     and not (isin and not importers.valid_isin(isin)) and not (match and match["type"] != "candidate"))
+        if st.button("Run screening", type="primary", disabled=not ready):
+            new = [x for x in planned if x["id"] not in {y["id"] for y in criteria}]
+            for x in new:
+                x["active"] = False
+            try:
+                db.save_criteria(new)
+                if match is None:
+                    db.save_holdings([{"name": name, "ticker": ticker or None, "isin": isin or None, "weight": 0,
+                                       "type": "candidate", "pre_investment": True, "decision": "review"}])
+                    company = next(h for h in db.holdings(candidates=True) if h["type"] == "candidate" and h["name"] == name
+                                   and (h.get("isin") or "") == isin)
+                else:
+                    company = match
+                    if not company.get("pre_investment"):
+                        db.save_holdings([{**company, "pre_investment": True,
+                                           "decision": company.get("decision") or "review"}])
+            except (db.DataError, StopIteration):
+                st.error("The company could not be saved.")
+                return
+            keep_form()
+            jobs = runner.build_jobs([company], planned, scores, web=True)[:remaining]
+            state.screening_run = runner.new_run(jobs, web=True, estimate=estimate, kind="pre")
+            state.screening_run["company_id"] = company["id"]
+            st.rerun()
+
+
+def pre_results_actions(run) -> None:
+    company_id = run.get("company_id")
+    current = next((h for h in db.holdings(candidates=True) if h["id"] == company_id), None)
+    if current is None:
+        return
+    with st.container(border=True, key="panel-pre-add"):
+        if current["type"] == "candidate":
+            st.write(f"{current['name']} is a pre-investment company. It is not part of the investment universe.")
+            st.button("Add to universe as prospect", type="primary", on_click=add_as_prospect, args=(company_id,),
+                      disabled=db.is_read_only())
+        else:
+            st.write(f"{current['name']} is in the investment universe as a {current['type']}.")
+
+
+def _history_changed(rows, version) -> None:
+    """Saves decisions edited in the list, or opens the profile of a ticked company."""
+    edits = state.get(f"pre-history-{version}", {}).get("edited_rows", {})
+    everyone = {h["id"]: h for h in db.holdings(candidates=True)}
+    try:
+        for i, change in edits.items():
+            row = rows[int(i)]
+            if change.get("Open"):
+                state[ui.COMPANY_KEY], state[ui.GOTO_KEY] = row["holding_id"], "views/company.py"
+            label = change.get("Decision")
+            if label:
+                decision = next(k for k, v in preinvest.DECISIONS.items() if v == label)
+                db.save_holdings([preinvest.decision_change(everyone[row["holding_id"]], decision)])
+                state["_pre_notice"] = f"Decision for {row['company']} saved."
+    except db.DataError as e:
+        state["_pre_error"] = str(e)
+    state["pre-history-version"] = version + 1
+
+
+def pre_history() -> None:
+    try:
+        rows = preinvest.history(db.holdings(candidates=True), criteria, rules.index_scores(db.scores()), db.findings(), db.notes())
+    except db.DataError as e:
+        st.error(str(e))
+        return
+    if not rows:
+        return
+    version = state.setdefault("pre-history-version", 0)
+    with st.container(border=True, key="panel-pre-history"):
+        st.subheader("Previous Pre-investment Screenings", anchor=False)
+        if "_pre_notice" in state:
+            st.caption(state.pop("_pre_notice"))
+        st.data_editor(
+            pd.DataFrame([{
+                "Open": False, "Date": r["date"], "Company": r["company"], "Result": rules.LABELS[r["result"]],
+                "Criteria": r["criteria"], "Summary": r["summary"], "Decision": preinvest.DECISIONS[r["decision"]],
+                "In universe": "Prospect" if r["in_universe"] else "", "Note": r["note"],
+            } for r in rows]),
+            key=f"pre-history-{version}", hide_index=True, on_change=_history_changed, args=(rows, version),
+            column_order=["Open", "Date", "Company", "Result", "Decision", "Note", "Summary", "Criteria", "In universe"],
+            disabled=["Date", "Company", "Result", "Criteria", "Summary", "In universe", "Note"] + (
+                ["Decision"] if db.is_read_only() else []),
+            column_config={
+                "Open": st.column_config.CheckboxColumn("Open", help="Opens the Company Profile.", width=70),
+                "Note": st.column_config.TextColumn(width="medium"),
+                "Decision": st.column_config.SelectboxColumn(options=list(preinvest.DECISIONS.values()), required=True),
+                "Summary": st.column_config.TextColumn(width="medium"),
+            },
+        )
+        st.download_button("Download history", preinvest.to_xlsx(rows), "redline-pre-investment.xlsx",
+                           mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+
+SECTIONS = {"monitoring": "Portfolio Monitoring", "holding": "Holding Screening", "pre": "Pre-investment Screening"}
 
 run = state.get("screening_run")
 if run and (run["active"] or run["current"]):
     progress()
 else:
     if run:
-        state.setdefault("screening-section", "monitoring" if run.get("kind") == "monitor" else "holding")
+        state.setdefault("screening-section", {"monitor": "monitoring", "pre": "pre"}.get(run.get("kind"), "holding"))
     if state.get("screening-section") not in SECTIONS:
         state["screening-section"] = "monitoring"
     section = state["screening-section"]
     if section == "monitoring":
         portfolio_monitoring()
+    elif section == "pre":
+        pre_investment()
     else:
         holding_screening()
-    if run and (run.get("kind") == "monitor") == (section == "monitoring"):
+    kind = {"monitor": "monitoring", "pre": "pre"}.get((run or {}).get("kind"), "holding")
+    if run and kind == section:
         record_monitoring(run)
+        if section == "pre":
+            pre_results_actions(run)
         results(run)
+    if section == "pre":
+        pre_history()
 
 st.caption(AI_NOTE)

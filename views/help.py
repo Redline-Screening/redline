@@ -11,6 +11,7 @@ PAGES = [
     ("Data Sources", None, "views/sources.py"),
     ("Portfolio Monitoring", "monitoring", "views/screening.py"),
     ("Holding Screening", "holding", "views/screening.py"),
+    ("Pre-investment Screening", "pre", "views/screening.py"),
     ("Company Profile", None, "views/company.py"),
     ("Alerts", None, "views/alerts.py"),
 ]

@@ -1,0 +1,942 @@
+name,ticker,isin,country,index
+3i,III,GB00B1YW4409,United Kingdom,FTSE 100
+3M,MMM,,United States,S&P 500
+A. O. Smith,AOS,,United States,S&P 500
+A.P. Møller-Mærsk (class A),A,,Denmark,OMX Copenhagen 25
+A.P. Møller-Mærsk (class B),B,,Denmark,OMX Copenhagen 25
+A2A,A2A.MI,IT0001233417,Italy,FTSE MIB
+AB InBev,ABI,,Belgium,BEL 20
+ABB Ltd,ABBN,,Switzerland,SMI
+Abbott Laboratories,ABT,,United States,S&P 500
+AbbVie,ABBV,,United States,S&P 500
+Aberdeen Group,ABDN,GB00BF8Q6K64,United Kingdom,FTSE 100
+ABN AMRO,ABN.AS,,Netherlands,AEX
+Accenture,ACN,,United States,S&P 500
+Acciona,ANA.MC,,Spain,IBEX 35
+Acciona Energía,ANE.MC,,Spain,IBEX 35
+Accor,AC.PA,,France,CAC 40
+Acerinox,ACX.MC,,Spain,IBEX 35
+Ackermans & van Haaren,ACKB,,Belgium,BEL 20
+ACS,ACS.MC,,Spain,IBEX 35
+Addtech B,ADDT-B.ST,,Sweden,OMX Stockholm 30
+Adidas,ADS.DE,,Germany,DAX
+Admiral Group,ADM,GB00B02J6398,United Kingdom,FTSE 100
+Adobe Inc.,ADBE,,United States,S&P 500
+Advanced Micro Devices,AMD,,United States,S&P 500
+Adyen,ADYEN.AS,,Netherlands,AEX
+Aedifica,AED,,Belgium,BEL 20
+Aegon,AGN.AS,,Netherlands,AEX
+AENA,AENA.MC,,Spain,IBEX 35
+AES Corporation,AES,,United States,S&P 500
+Aflac,AFL,,United States,S&P 500
+Ageas,AGS,,Belgium,BEL 20
+Agilent Technologies,A,,United States,S&P 500
+Ahold Delhaize,AD.AS,,Netherlands,AEX
+Air Liquide,AI.PA,,France,CAC 40
+Air Products,APD,,United States,S&P 500
+Airbnb,ABNB,,United States,S&P 500
+Airbus,AIR.PA,,Germany,DAX
+Airtel Africa,AAF,GB00BKDRYJ47,United Kingdom,FTSE 100
+Akamai Technologies,AKAM,,United States,S&P 500
+Aker BP,AKRBP,,Norway,OBX
+AkzoNobel,AKZA.AS,,Netherlands,AEX
+AL Sydbank,ALSYDB,,Denmark,OMX Copenhagen 25
+Albemarle Corporation,ALB,,United States,S&P 500
+Alcon Inc,ALC,,Switzerland,SMI
+Alexandria Real Estate Equities,ARE,,United States,S&P 500
+Alfa Laval,ALFA.ST,,Sweden,OMX Stockholm 30
+Align Technology,ALGN,,United States,S&P 500
+Allegion,ALLE,,United States,S&P 500
+Alliance Witan,ALW,GB00B11V7W98,United Kingdom,FTSE 100
+Alliant Energy,LNT,,United States,S&P 500
+Allianz,ALV.DE,,Germany,DAX
+Allstate,ALL,,United States,S&P 500
+Alphabet Inc. (Class A),GOOGL,,United States,S&P 500
+Alphabet Inc. (Class C),GOOG,,United States,S&P 500
+Altri,ALTR,,Portugal,PSI
+Altria,MO,,United States,S&P 500
+Amadeus IT Group,AMS.MC,,Spain,IBEX 35
+Amazon,AMZN,,United States,S&P 500
+Ambu,B,,Denmark,OMX Copenhagen 25
+Amcor,AMCR,,United States,S&P 500
+Ameren,AEE,,United States,S&P 500
+American Electric Power,AEP,,United States,S&P 500
+American Express,AXP,,United States,S&P 500
+American International Group,AIG,,United States,S&P 500
+American Tower,AMT,,United States,S&P 500
+American Water Works,AWK,,United States,S&P 500
+Ameriprise Financial,AMP,,United States,S&P 500
+Ametek,AME,,United States,S&P 500
+Amgen,AMGN,,United States,S&P 500
+Amphenol,APH,,United States,S&P 500
+Amplifon,AMP.MI,IT0004056880,Italy,FTSE MIB
+Amrize AG,AMRZ,,Switzerland,SMI
+Analog Devices,ADI,,United States,S&P 500
+Anglo American plc,AAL,GB00BTK05J60,United Kingdom,FTSE 100
+Anheuser-Busch InBev,ABI.BR,,Belgium,EURO STOXX 50
+Antofagasta plc,ANTO,GB0000456144,United Kingdom,FTSE 100
+Aon plc,AON,,United States,S&P 500
+APA Corporation,APA,,United States,S&P 500
+Aperam,APAM,,Belgium,BEL 20
+Apollo Global Management,APO,,United States,S&P 500
+Apple Inc.,AAPL,,United States,S&P 500
+Applied Materials,AMAT,,United States,S&P 500
+AppLovin,APP,,United States,S&P 500
+Aptiv,APTV,,United States,S&P 500
+ArcelorMittal,MT.AS,,France,CAC 40
+Arch Capital Group,ACGL,,United States,S&P 500
+Archer Daniels Midland,ADM,,United States,S&P 500
+Ares Management,ARES,,United States,S&P 500
+arGEN-X [nl],ARGX,,Belgium,BEL 20
+Argenx,ARGX.BR,,Netherlands,EURO STOXX 50
+Arista Networks,ANET,,United States,S&P 500
+Arthur J. Gallagher & Co.,AJG,,United States,S&P 500
+ASM International,ASM.AS,,Netherlands,AEX
+ASML Holding,ASML.AS,,Netherlands,AEX
+ASR Nederland,ASRNL.AS,,Netherlands,AEX
+Assa Abloy B,ASSA-B.ST,,Sweden,OMX Stockholm 30
+Associated British Foods,ABF,GB0006731235,United Kingdom,FTSE 100
+Assurant,AIZ,,United States,S&P 500
+AstraZeneca,AZN,GB0009895292,United Kingdom,FTSE 100
+AT&T,T,,United States,S&P 500
+Atlas Copco A,ATCO-A.ST,,Sweden,OMX Stockholm 30
+Atmos Energy,ATO,,United States,S&P 500
+Autodesk,ADSK,,United States,S&P 500
+Automatic Data Processing,ADP,,United States,S&P 500
+Autotrader Group,AUTO,GB00BVYVFW23,United Kingdom,FTSE 100
+AutoZone,AZO,,United States,S&P 500
+Avery Dennison,AVY,,United States,S&P 500
+Avio,AVIO.MI,IT0005119810,Italy,FTSE MIB
+Aviva,AV,GB00BPQY8M80,United Kingdom,FTSE 100
+Axa,CS.PA,,France,CAC 40
+Axon Enterprise,AXON,,United States,S&P 500
+Azelis Group,AZE,,Belgium,BEL 20
+Azimut,AZM.MI,IT0003261697,Italy,FTSE MIB
+Babcock International,BAB,GB0009697037,United Kingdom,FTSE 100
+BAE Systems,BA,GB0002634946,United Kingdom,FTSE 100
+Baker Hughes,BKR,,United States,S&P 500
+Balfour Beatty,BBY,GB0000961622,United Kingdom,FTSE 100
+Ball Corporation,BALL,,United States,S&P 500
+Banca Generali,BGN.MI,IT0001031084,Italy,FTSE MIB
+Banca Mediolanum,BMED.MI,IT0004776628,Italy,FTSE MIB
+Banca Monte dei Paschi di Siena,BMPS.MI,IT0005508921,Italy,FTSE MIB
+Banco BPM,BAMI.MI,IT0005218380,Italy,FTSE MIB
+Banco Comercial Português,BCP,,Portugal,PSI
+Banco Sabadell,SAB.MC,,Spain,IBEX 35
+Banco Santander,SAN.MC,,Spain,EURO STOXX 50
+Bank of America,BAC,,United States,S&P 500
+Bankinter,BKT.MC,,Spain,IBEX 35
+Barclays,BARC,GB0031348658,United Kingdom,FTSE 100
+Barratt Redrow,BTRW,GB0000811801,United Kingdom,FTSE 100
+BASF,BAS.DE,,Germany,DAX
+Baxter International,BAX,,United States,S&P 500
+Bayer,BAYN.DE,,Germany,DAX
+BBVA,BBVA.MC,,Spain,IBEX 35
+BE Semiconductors,BESI.AS,,Netherlands,AEX
+Becton Dickinson,BDX,,United States,S&P 500
+Beiersdorf,BEI.DE,,Germany,DAX
+Berkshire Hathaway,BRK.B,,United States,S&P 500
+Best Buy,BBY,,United States,S&P 500
+Bio-Techne,TECH,,United States,S&P 500
+Biogen,BIIB,,United States,S&P 500
+BlackRock,BLK,,United States,S&P 500
+Blackstone Inc.,BX,,United States,S&P 500
+"Block, Inc.",XYZ,,United States,S&P 500
+Bloom Energy,BE,,United States,S&P 500
+BMW,BMW.DE,,Germany,DAX
+BNP Paribas,BNP.PA,,France,CAC 40
+BNY Mellon,BNY,,United States,S&P 500
+Boeing,BA,,United States,S&P 500
+Boliden,BOL.ST,,Sweden,OMX Stockholm 30
+Booking Holdings,BKNG,,United States,S&P 500
+Boston Scientific,BSX,,United States,S&P 500
+Bouygues,EN.PA,,France,CAC 40
+BP,BP,GB0007980591,United Kingdom,FTSE 100
+BPER Banca,BPE.MI,IT0000066123,Italy,FTSE MIB
+Brenntag,BNR.DE,,Germany,DAX
+Bristol Myers Squibb,BMY,,United States,S&P 500
+British American Tobacco,BATS,GB0002875804,United Kingdom,FTSE 100
+British Land,BLND,GB0001367019,United Kingdom,FTSE 100
+Broadcom,AVGO,,United States,S&P 500
+Broadridge Financial Solutions,BR,,United States,S&P 500
+Brown & Brown,BRO,,United States,S&P 500
+Brown–Forman,BF.B,,United States,S&P 500
+Brunello Cucinelli,BC.MI,IT0004764699,Italy,FTSE MIB
+BT Group,BT.A,GB0030913577,United Kingdom,FTSE 100
+Bunge Global,BG,,United States,S&P 500
+Bunzl,BNZL,GB00B0744B38,United Kingdom,FTSE 100
+Burberry Group,BRBY,GB0031743007,United Kingdom,FTSE 100
+Bureau Veritas,BVI.PA,,France,CAC 40
+Buzzi,BZU.MI,IT0001347308,Italy,FTSE MIB
+BW LPG,BWLPG,,Norway,OBX
+"BXP, Inc.",BXP,,United States,S&P 500
+C.H. Robinson,CHRW,,United States,S&P 500
+Cadence Design Systems,CDNS,,United States,S&P 500
+CaixaBank,CABK.MC,,Spain,IBEX 35
+Camden Property Trust,CPT,,United States,S&P 500
+Campari,CPR.MI,NL0015435975,Italy,FTSE MIB
+Capgemini,CAP.PA,,France,CAC 40
+Capital One,COF,,United States,S&P 500
+Cardinal Health,CAH,,United States,S&P 500
+Carlsberg Group,B,,Denmark,OMX Copenhagen 25
+Carnival Corporation,CCL,,United States,S&P 500
+Carrefour,CA.PA,,France,CAC 40
+Carrier Global,CARR,,United States,S&P 500
+Carvana,CVNA,,United States,S&P 500
+Casey's,CASY,,United States,S&P 500
+Caterpillar Inc.,CAT,,United States,S&P 500
+Cboe Global Markets,CBOE,,United States,S&P 500
+CBRE Group,CBRE,,United States,S&P 500
+CDW Corporation,CDW,,United States,S&P 500
+Cellnex Telecom,CLNX.MC,,Spain,IBEX 35
+Cencora,COR,,United States,S&P 500
+Centene Corporation,CNC,,United States,S&P 500
+CenterPoint Energy,CNP,,United States,S&P 500
+Centrica,CNA,GB00B033F229,United Kingdom,FTSE 100
+CF Industries,CF,,United States,S&P 500
+Charles River Laboratories,CRL,,United States,S&P 500
+Charles Schwab Corporation,SCHW,,United States,S&P 500
+Charter Communications,CHTR,,United States,S&P 500
+Chevron Corporation,CVX,,United States,S&P 500
+Chipotle Mexican Grill,CMG,,United States,S&P 500
+Chubb Limited,CB,,United States,S&P 500
+Church & Dwight,CHD,,United States,S&P 500
+Ciena,CIEN,,United States,S&P 500
+Cigna,CI,,United States,S&P 500
+Cincinnati Financial,CINF,,United States,S&P 500
+Cintas,CTAS,,United States,S&P 500
+Cisco,CSCO,,United States,S&P 500
+Citigroup,C,,United States,S&P 500
+Citizens Financial Group,CFG,,United States,S&P 500
+Clorox,CLX,,United States,S&P 500
+CME Group,CME,,United States,S&P 500
+CMS Energy,CMS,,United States,S&P 500
+Coca-Cola Company (The),KO,,United States,S&P 500
+Coca-Cola Europacific Partners,CCEP,GB00BDCPN049,United Kingdom,FTSE 100
+Coca-Cola HBC,CCH,CH0198251305,United Kingdom,FTSE 100
+Cognizant,CTSH,,United States,S&P 500
+Coherent Corp.,COHR,,United States,S&P 500
+Coinbase,COIN,,United States,S&P 500
+Colgate-Palmolive,CL,,United States,S&P 500
+Coloplast,B,,Denmark,OMX Copenhagen 25
+Comcast,CMCSA,,United States,S&P 500
+Comfort Systems USA,FIX,,United States,S&P 500
+Commerzbank,CBK.DE,,Germany,DAX
+Compagnie Financière Richemont SA,CFR,,Switzerland,SMI
+Compass Group,CPG,GB00BD6K4575,United Kingdom,FTSE 100
+Computacenter,CCC,GB00BV9FP302,United Kingdom,FTSE 100
+ConocoPhillips,COP,,United States,S&P 500
+Consolidated Edison,ED,,United States,S&P 500
+Constellation Brands,STZ,,United States,S&P 500
+Constellation Energy,CEG,,United States,S&P 500
+Continental,CON.DE,,Germany,DAX
+Convatec,CTEC,GB00BD3VFW73,United Kingdom,FTSE 100
+Cooper Companies (The),COO,,United States,S&P 500
+Copart,CPRT,,United States,S&P 500
+Corning Inc.,GLW,,United States,S&P 500
+Corpay,CPAY,,United States,S&P 500
+Corticeira Amorim,COR,,Portugal,PSI
+CoStar Group,CSGP,,United States,S&P 500
+Costco,COST,,United States,S&P 500
+CRH plc,CRH,,United States,S&P 500
+Croda International,CRDA,GB00BJFFLV09,United Kingdom,FTSE 100
+CrowdStrike,CRWD,,United States,S&P 500
+Crown Castle,CCI,,United States,S&P 500
+Crédit Agricole,ACA.PA,,France,CAC 40
+CSX Corporation,CSX,,United States,S&P 500
+CTT Correios de Portugal,CTT,,Portugal,PSI
+Cummins,CMI,,United States,S&P 500
+CVS Health,CVS,,United States,S&P 500
+D'Ieteren,DIE,,Belgium,BEL 20
+D. R. Horton,DHI,,United States,S&P 500
+Daimler Truck,DTG.DE,,Germany,DAX
+Danaher Corporation,DHR,,United States,S&P 500
+Danone,BN.PA,,France,CAC 40
+Danske Bank,DANSKE,,Denmark,OMX Copenhagen 25
+Darden Restaurants,DRI,,United States,S&P 500
+Dassault Systèmes,DSY.PA,,France,CAC 40
+Datadog,DDOG,,United States,S&P 500
+DaVita,DVA,,United States,S&P 500
+DCC Energy,DCC,IE0002424939,United Kingdom,FTSE 100
+Deckers Brands,DECK,,United States,S&P 500
+Deere & Company,DE,,United States,S&P 500
+Dell Technologies,DELL,,United States,S&P 500
+Delta Air Lines,DAL,,United States,S&P 500
+Demant,DEMANT,,Denmark,OMX Copenhagen 25
+Deutsche Bank,DBK.DE,,Germany,DAX
+Deutsche Börse,DB1.DE,,Germany,DAX
+Deutsche Post,DHL.DE,,Germany,DAX
+Deutsche Telekom,DTE.DE,,Germany,DAX
+Devon Energy,DVN,,United States,S&P 500
+Dexcom,DXCM,,United States,S&P 500
+Diageo,DGE,GB0002374006,United Kingdom,FTSE 100
+Diamondback Energy,FANG,,United States,S&P 500
+Digital Realty,DLR,,United States,S&P 500
+Diploma,DPLM,GB0001826634,United Kingdom,FTSE 100
+DNB Bank,DNB,,Norway,OBX
+Dollar General,DG,,United States,S&P 500
+Dollar Tree,DLTR,,United States,S&P 500
+Dominion Energy,D,,United States,S&P 500
+Domino's,DPZ,,United States,S&P 500
+DoorDash,DASH,,United States,S&P 500
+Dover Corporation,DOV,,United States,S&P 500
+Dow Inc.,DOW,,United States,S&P 500
+DSM Firmenich AG,DSFIR.AS,,Netherlands,AEX
+DSV,DSV,,Denmark,OMX Copenhagen 25
+DTE Energy,DTE,,United States,S&P 500
+Duke Energy,DUK,,United States,S&P 500
+DuPont,DD,,United States,S&P 500
+E.ON,EOAN.DE,,Germany,DAX
+EasyJet,EZJ,GB00B7KR2P84,United Kingdom,FTSE 100
+Eaton Corporation,ETN,,United States,S&P 500
+eBay Inc.,EBAY,,United States,S&P 500
+EchoStar,ECHO,,United States,S&P 500
+Ecolab,ECL,,United States,S&P 500
+Edison International,EIX,,United States,S&P 500
+EDP Renováveis,EDPR,,Portugal,PSI
+Edwards Lifesciences,EW,,United States,S&P 500
+Eiffage,FGR.PA,,France,CAC 40
+Elevance Health,ELV,,United States,S&P 500
+Elia Group,ELI,,Belgium,BEL 20
+Elisa,ELISA.HE,,Finland,OMX Helsinki 25
+Emcor,EME,,United States,S&P 500
+Emerson Electric,EMR,,United States,S&P 500
+Enagás,ENG.MC,,Spain,IBEX 35
+Endeavour Mining,EDV,GB00BL6K5J42,United Kingdom,FTSE 100
+Endesa,ELE.MC,,Spain,IBEX 35
+Enel,ENEL.MI,IT0003128367,Italy,FTSE MIB
+Energias de Portugal,EDP,,Portugal,PSI
+Engie,ENGI.PA,,France,CAC 40
+Eni,ENI.MI,IT0003132476,Italy,FTSE MIB
+Entergy,ETR,,United States,S&P 500
+EOG Resources,EOG,,United States,S&P 500
+Epiroc A,EPI-A.ST,,Sweden,OMX Stockholm 30
+EQT,EQT.ST,,Sweden,OMX Stockholm 30
+EQT Corporation,EQT,,United States,S&P 500
+Equifax,EFX,,United States,S&P 500
+Equinix,EQIX,,United States,S&P 500
+Equinor,EQNR,,Norway,OBX
+Ericsson B,ERIC-B.ST,,Sweden,OMX Stockholm 30
+Erie Indemnity,ERIE,,United States,S&P 500
+Essex Property Trust,ESS,,United States,S&P 500
+EssilorLuxottica,EL.PA,,France,CAC 40
+Essity B,ESSITY-B.ST,,Sweden,OMX Stockholm 30
+Estée Lauder Companies (The),EL,,United States,S&P 500
+Eurofins Scientific,ERF.PA,,France,CAC 40
+Euronext,ENX.PA,,France,CAC 40
+Everest Group,EG,,United States,S&P 500
+Evergy,EVRG,,United States,S&P 500
+Everpure,P,,United States,S&P 500
+Eversource Energy,ES,,United States,S&P 500
+Evolution,EVO.ST,,Sweden,OMX Stockholm 30
+Exelon,EXC,,United States,S&P 500
+Exor,EXO.AS,,Netherlands,AEX
+Expand Energy,EXE,,United States,S&P 500
+Expedia Group,EXPE,,United States,S&P 500
+Expeditors International,EXPD,,United States,S&P 500
+Experian,EXPN,GB00B19NLV48,United Kingdom,FTSE 100
+Extra Space Storage,EXR,,United States,S&P 500
+ExxonMobil,XOM,,United States,S&P 500
+F & C Investment Trust,FCIT,GB00BS88V647,United Kingdom,FTSE 100
+"F5, Inc.",FFIV,,United States,S&P 500
+FactSet,FDS,,United States,S&P 500
+Fair Isaac,FICO,,United States,S&P 500
+Fastenal,FAST,,United States,S&P 500
+Federal Realty Investment Trust,FRT,,United States,S&P 500
+FedEx,FDX,,United States,S&P 500
+FedEx Freight,FDXF,,United States,S&P 500
+Ferguson Enterprises,FERG,,United States,S&P 500
+Ferrari,RACE.MI,NL0011585146,Italy,FTSE MIB
+Ferrovial,FER.MC,,Spain,IBEX 35
+Fidelity National Information Services,FIS,,United States,S&P 500
+Fifth Third Bancorp,FITB,,United States,S&P 500
+Fincantieri,FCT.MI,IT0005599938,Italy,FTSE MIB
+FinecoBank,FBK.MI,IT0000072170,Italy,FTSE MIB
+First Solar,FSLR,,United States,S&P 500
+FirstEnergy,FE,,United States,S&P 500
+Fiserv,FISV,,United States,S&P 500
+Flex Ltd.,FLEX,,United States,S&P 500
+FLSmidth & Co.,FLS,,Denmark,OMX Copenhagen 25
+Fluidra,FDR.MC,,Spain,IBEX 35
+Ford Motor Company,F,,United States,S&P 500
+Fortinet,FTNT,,United States,S&P 500
+Fortive,FTV,,United States,S&P 500
+Fortum,FORTUM.HE,,Finland,OMX Helsinki 25
+Fox Corporation (Class A),FOXA,,United States,S&P 500
+Fox Corporation (Class B),FOX,,United States,S&P 500
+Franklin Resources,BEN,,United States,S&P 500
+Freeport-McMoRan,FCX,,United States,S&P 500
+Fresenius,FRE.DE,,Germany,DAX
+Fresenius Medical Care,FME.DE,,Germany,DAX
+Fresnillo plc,FRES,GB00B2QPKJ12,United Kingdom,FTSE 100
+Frontline,FRO,,Norway,OBX
+Galderma,GALD,,Switzerland,SMI
+Galp Energia,GALP,,Portugal,PSI
+Games Workshop,GAW,GB0003718474,United Kingdom,FTSE 100
+Garmin,GRMN,,United States,S&P 500
+Gartner,IT,,United States,S&P 500
+GBL,GBLB,,Belgium,BEL 20
+GE Aerospace,GE,,United States,S&P 500
+GE HealthCare,GEHC,,United States,S&P 500
+GE Vernova,GEV,,United States,S&P 500
+GEA Group,G1A.DE,,Germany,DAX
+Geberit AG,GEBN,,Switzerland,SMI
+Gen Digital,GEN,,United States,S&P 500
+Generac,GNRC,,United States,S&P 500
+General Dynamics,GD,,United States,S&P 500
+General Mills,GIS,,United States,S&P 500
+General Motors,GM,,United States,S&P 500
+Generali,G.MI,IT0000062072,Italy,FTSE MIB
+Genmab,GMAB,,Denmark,OMX Copenhagen 25
+Genuine Parts Company,GPC,,United States,S&P 500
+Gilead Sciences,GILD,,United States,S&P 500
+Givaudan SA,GIVN,,Switzerland,SMI
+Gjensidige Forsikring,GJF,,Norway,OBX
+Glencore,GLEN,JE00B4T3BW64,United Kingdom,FTSE 100
+Global Payments,GPN,,United States,S&P 500
+Globe Life,GL,,United States,S&P 500
+GN Store Nord,GN,,Denmark,OMX Copenhagen 25
+GoDaddy,GDDY,,United States,S&P 500
+Golden Ocean Group,GOGL,,Norway,OBX
+Goldman Sachs,GS,,United States,S&P 500
+Grifols,GRF.MC,,Spain,IBEX 35
+GSK plc,GSK,GB00BN7SWP63,United Kingdom,FTSE 100
+Hafnia Limited,HAFNI,,Norway,OBX
+Haleon,HLN,GB00BMX86B70,United Kingdom,FTSE 100
+Halliburton,HAL,,United States,S&P 500
+Halma plc,HLMA,GB0004052071,United Kingdom,FTSE 100
+Handelsbanken A,SHB-A.ST,,Sweden,OMX Stockholm 30
+Hannover Re,HNR1.DE,,Germany,DAX
+Hartford (The),HIG,,United States,S&P 500
+Hasbro,HAS,,United States,S&P 500
+HCA Healthcare,HCA,,United States,S&P 500
+Healthpeak Properties,DOC,,United States,S&P 500
+Heidelberg Materials,HEI.DE,,Germany,DAX
+Heineken,HEIA.AS,,Netherlands,AEX
+Henkel,HEN3.DE,,Germany,DAX
+Hennes & Mauritz B,HM-B.ST,,Sweden,OMX Stockholm 30
+Henry Schein,HSIC,,United States,S&P 500
+Hera,HER.MI,IT0001250932,Italy,FTSE MIB
+Hermès,RMS.PA,,France,CAC 40
+Hershey Company (The),HSY,,United States,S&P 500
+Hewlett Packard Enterprise,HPE,,United States,S&P 500
+Hexagon B,HEXA-B.ST,,Sweden,OMX Stockholm 30
+Hiab,HIAB.HE,,Finland,OMX Helsinki 25
+Hilton Worldwide,HLT,,United States,S&P 500
+Hiscox,HSX,BMG4593F1389,United Kingdom,FTSE 100
+Holcim Limited,HOLN,,Switzerland,SMI
+Home Depot (The),HD,,United States,S&P 500
+Honeywell Aerospace,HONA,,United States,S&P 500
+Honeywell Technologies,HON,,United States,S&P 500
+Hormel Foods,HRL,,United States,S&P 500
+Host Hotels & Resorts,HST,,United States,S&P 500
+Howdens Joinery,HWDN,GB0005576813,United Kingdom,FTSE 100
+Howmet Aerospace,HWM,,United States,S&P 500
+HP Inc.,HPQ,,United States,S&P 500
+HSBC,HSBA,GB0005405286,United Kingdom,FTSE 100
+Hubbell Incorporated,HUBB,,United States,S&P 500
+Huhtamäki,HUH1V.HE,,Finland,OMX Helsinki 25
+Humana,HUM,,United States,S&P 500
+Huntington Bancshares,HBAN,,United States,S&P 500
+Huntington Ingalls Industries,HII,,United States,S&P 500
+Höegh Autoliners ASA,HAUTO,,Norway,OBX
+Iberdrola,IBE.MC,,Spain,IBEX 35
+Ibersol,IBS,,Portugal,PSI
+IBM,IBM,,United States,S&P 500
+ICG,ICG,GB00BYT1DJ19,United Kingdom,FTSE 100
+IDEX Corporation,IEX,,United States,S&P 500
+Idexx Laboratories,IDXX,,United States,S&P 500
+IG Group,IGG,JE00C08DXT95,United Kingdom,FTSE 100
+IHG Hotels & Resorts,IHG,GB00BHJYC057,United Kingdom,FTSE 100
+Illinois Tool Works,ITW,,United States,S&P 500
+"Illumina, Inc.",ILMN,,United States,S&P 500
+IMCD,IMCD.AS,,Netherlands,AEX
+IMI,IMI,GB00BGLP8L22,United Kingdom,FTSE 100
+Imperial Brands,IMB,GB0004544929,United Kingdom,FTSE 100
+Incyte,INCY,,United States,S&P 500
+Inditex,ITX.MC,,Spain,IBEX 35
+Indra,IDR.MC,,Spain,IBEX 35
+Industrivärden C,INDU-C.ST,,Sweden,OMX Stockholm 30
+Infineon Technologies,IFX.DE,,Germany,DAX
+Informa,INF,GB00BMJ6DW54,United Kingdom,FTSE 100
+ING Group,INGA.AS,,Netherlands,AEX
+Ingersoll Rand,IR,,United States,S&P 500
+Inmobiliaria Colonial,COL.MC,,Spain,IBEX 35
+Insulet Corporation,PODD,,United States,S&P 500
+Intel,INTC,,United States,S&P 500
+Interactive Brokers,IBKR,,United States,S&P 500
+Intercontinental Exchange,ICE,,United States,S&P 500
+International Airlines Group,IAG,ES0177542018,United Kingdom,FTSE 100
+International Flavors & Fragrances,IFF,,United States,S&P 500
+International Paper,IP,,United States,S&P 500
+Intertek,ITRK,GB0031638363,United Kingdom,FTSE 100
+Intesa Sanpaolo,ISP.MI,IT0000072618,Italy,FTSE MIB
+Intuit,INTU,,United States,S&P 500
+Intuitive Surgical,ISRG,,United States,S&P 500
+Invesco,IVZ,,United States,S&P 500
+Investec,INVP,GB00B17BBQ50,United Kingdom,FTSE 100
+Investor B,INVE-B.ST,,Sweden,OMX Stockholm 30
+Invitation Homes,INVH,,United States,S&P 500
+INWIT,INW.MI,IT0005090300,Italy,FTSE MIB
+IQVIA,IQV,,United States,S&P 500
+Iron Mountain,IRM,,United States,S&P 500
+ISS,ISS,,Denmark,OMX Copenhagen 25
+Italgas,IG.MI,IT0005211237,Italy,FTSE MIB
+Ithaca Energy,ITH,GB00BPJHV584,United Kingdom,FTSE 100
+J.B. Hunt,JBHT,,United States,S&P 500
+J.M. Smucker Company (The),SJM,,United States,S&P 500
+Jabil,JBL,,United States,S&P 500
+Jack Henry & Associates,JKHY,,United States,S&P 500
+Jacobs Solutions,J,,United States,S&P 500
+JD Sports,JD,GB00BM8Q5M07,United Kingdom,FTSE 100
+Jerónimo Martins,JMT,,Portugal,PSI
+Johnson & Johnson,JNJ,,United States,S&P 500
+Johnson Controls,JCI,,United States,S&P 500
+JPMorgan Chase,JPM,,United States,S&P 500
+Jyske Bank,JYSK,,Denmark,OMX Copenhagen 25
+Kalmar [fi] B,KALMAR.HE,,Finland,OMX Helsinki 25
+KBC,KBC,,Belgium,BEL 20
+Kemira,KEMIRA.HE,,Finland,OMX Helsinki 25
+Kering,KER.PA,,France,CAC 40
+Kesko B,KESKOB.HE,,Finland,OMX Helsinki 25
+Keurig Dr Pepper,KDP,,United States,S&P 500
+KeyCorp,KEY,,United States,S&P 500
+Keysight Technologies,KEYS,,United States,S&P 500
+Kimberly-Clark,KMB,,United States,S&P 500
+Kimco Realty,KIM,,United States,S&P 500
+Kinder Morgan,KMI,,United States,S&P 500
+Kingfisher plc,KGF,GB0033195214,United Kingdom,FTSE 100
+KKR & Co.,KKR,,United States,S&P 500
+KLA Corporation,KLAC,,United States,S&P 500
+Kojamo [fi],KOJAMO.HE,,Finland,OMX Helsinki 25
+KONE,KNEBV.HE,,Finland,OMX Helsinki 25
+Konecranes,KCR.HE,,Finland,OMX Helsinki 25
+Kongsberg Gruppen,KOG,,Norway,OBX
+KPN,KPN.AS,,Netherlands,AEX
+Kraft Heinz,KHC,,United States,S&P 500
+Kroger,KR,,United States,S&P 500
+Kuehne + Nagel,KNIN,,Switzerland,SMI
+L'Oréal,OR.PA,,France,CAC 40
+L3Harris,LHX,,United States,S&P 500
+Labcorp,LH,,United States,S&P 500
+Laboratorios Rovi [es],ROVI.MC,,Spain,IBEX 35
+Lam Research,LRCX,,United States,S&P 500
+Land Securities,LAND,GB00BYW0PQ60,United Kingdom,FTSE 100
+Las Vegas Sands,LVS,,United States,S&P 500
+Legal & General,LGEN,GB0005603997,United Kingdom,FTSE 100
+Legrand,LR.PA,,France,CAC 40
+Leidos,LDOS,,United States,S&P 500
+Lennar,LEN,,United States,S&P 500
+Lennox International,LII,,United States,S&P 500
+Leonardo,LDO.MI,IT0003856405,Italy,FTSE MIB
+Lifco B,LIFCO-B.ST,,Sweden,OMX Stockholm 30
+Lilly (Eli),LLY,,United States,S&P 500
+Linde plc,LIN,,United States,S&P 500
+Lion Finance Group,BGEO,GB00BF4HYT85,United Kingdom,FTSE 100
+Live Nation Entertainment,LYV,,United States,S&P 500
+Lloyds Banking Group,LLOY,GB0008706128,United Kingdom,FTSE 100
+Lockheed Martin,LMT,,United States,S&P 500
+Loews Corporation,L,,United States,S&P 500
+Logista,LOG.MC,,Spain,IBEX 35
+Logitech International SA,LOGN,,Switzerland,SMI
+London Stock Exchange Group,LSEG,GB00B0SWJX34,United Kingdom,FTSE 100
+LondonMetric Property,LMP,GB00B4WFW713,United Kingdom,FTSE 100
+Lonza Group AG,LONN,,Switzerland,SMI
+Lottomatica Group,LTMC.MI,IT0005541336,Italy,FTSE MIB
+Lotus Bakeries,LOTB,,Belgium,BEL 20
+Lowe's,LOW,,United States,S&P 500
+Lululemon Athletica,LULU,,United States,S&P 500
+Lumentum,LITE,,United States,S&P 500
+LVMH,MC.PA,,France,CAC 40
+LVMH Moët Hennessy Louis Vuitton,MC.PA,,France,EURO STOXX 50
+LyondellBasell,LYB,,United States,S&P 500
+M&G,MNG,GB00BKFB1C65,United Kingdom,FTSE 100
+M&T Bank,MTB,,United States,S&P 500
+Mandatum [fi],MANTA.HE,,Finland,OMX Helsinki 25
+Mapfre,MAP.MC,,Spain,IBEX 35
+Marathon Petroleum,MPC,,United States,S&P 500
+Marks & Spencer,MKS,GB0031274896,United Kingdom,FTSE 100
+Marriott International,MAR,,United States,S&P 500
+Marsh McLennan,MRSH,,United States,S&P 500
+Martin Marietta Materials,MLM,,United States,S&P 500
+Marvell Technology,MRVL,,United States,S&P 500
+Masco,MAS,,United States,S&P 500
+Mastercard,MA,,United States,S&P 500
+McCormick & Company,MKC,,United States,S&P 500
+McDonald's,MCD,,United States,S&P 500
+McKesson,MCK,,United States,S&P 500
+Mediobanca,MB.MI,IT0000062957,Italy,FTSE MIB
+Medtronic,MDT,,United States,S&P 500
+Melexis [nl],MELE,,Belgium,BEL 20
+Melrose Industries,MRO,GB00BNGDN821,United Kingdom,FTSE 100
+Mercedes-Benz Group,MBG.DE,,Germany,DAX
+Merck,MRK.DE,,Germany,DAX
+Merck & Co.,MRK,,United States,S&P 500
+Merlin Properties,MRL.MC,,Spain,IBEX 35
+Meta Platforms,META,,United States,S&P 500
+Metlen Energy & Metals,MTLN,GB00BTQGS779,United Kingdom,FTSE 100
+MetLife,MET,,United States,S&P 500
+Metso,METSO.HE,,Finland,OMX Helsinki 25
+Mettler Toledo,MTD,,United States,S&P 500
+MGM Resorts,MGM,,United States,S&P 500
+Michelin,ML.PA,,France,CAC 40
+Microchip Technology,MCHP,,United States,S&P 500
+Micron Technology,MU,,United States,S&P 500
+Microsoft,MSFT,,United States,S&P 500
+Mid-America Apartment Communities,MAA,,United States,S&P 500
+Moderna,MRNA,,United States,S&P 500
+Moncler,MONC.MI,IT0004965148,Italy,FTSE MIB
+Mondelez International,MDLZ,,United States,S&P 500
+Monolithic Power Systems,MPWR,,United States,S&P 500
+Monster Beverage,MNST,,United States,S&P 500
+Montea,MONT,,Belgium,BEL 20
+Moody's Corporation,MCO,,United States,S&P 500
+Morgan Stanley,MS,,United States,S&P 500
+Mosaic Company (The),MOS,,United States,S&P 500
+Mota-Engil,EGL,,Portugal,PSI
+Motorola Solutions,MSI,,United States,S&P 500
+Mowi,MOWI,,Norway,OBX
+MPC Container Ships,MPCC,,Norway,OBX
+MSCI,MSCI,,United States,S&P 500
+MTU Aero Engines,MTX.DE,,Germany,DAX
+Munich Re,MUV2.DE,,Germany,DAX
+"Nasdaq, Inc.",NDAQ,,United States,S&P 500
+National Grid plc,NG,GB00BDR05C01,United Kingdom,FTSE 100
+Naturgy,NTGY.MC,,Spain,IBEX 35
+NatWest Group,NWG,GB00BM8PJY71,United Kingdom,FTSE 100
+Neste,NESTE.HE,,Finland,OMX Helsinki 25
+Nestlé SA,NESN,,Switzerland,SMI
+NetApp,NTAP,,United States,S&P 500
+Netflix,NFLX,,United States,S&P 500
+Newmont,NEM,,United States,S&P 500
+News Corp (Class A),NWSA,,United States,S&P 500
+News Corp (Class B),NWS,,United States,S&P 500
+Nexi,NEXI.MI,IT0005366767,Italy,FTSE MIB
+Next plc,NXT,GB0032089863,United Kingdom,FTSE 100
+NextEra Energy,NEE,,United States,S&P 500
+Nibe Industrier B,NIBE-B.ST,,Sweden,OMX Stockholm 30
+"Nike, Inc.",NKE,,United States,S&P 500
+NiSource,NI,,United States,S&P 500
+NKT,NKT,,Denmark,OMX Copenhagen 25
+NN Group,NN.AS,,Netherlands,AEX
+Nokia,NOKIA.HE,,Finland,EURO STOXX 50
+Nokian Tyres,TYRES.HE,,Finland,OMX Helsinki 25
+Nordea,NDA-FI.HE,,Finland,EURO STOXX 50
+Nordea Bank Abp,NDA-SE.ST,,Sweden,OMX Stockholm 30
+Nordic Semiconductor,NOD,,Norway,OBX
+Nordson Corporation,NDSN,,United States,S&P 500
+Norfolk Southern,NSC,,United States,S&P 500
+Norsk Hydro,NHY,,Norway,OBX
+Northern Trust,NTRS,,United States,S&P 500
+Northrop Grumman,NOC,,United States,S&P 500
+Norwegian Air Shuttle,NAS,,Norway,OBX
+Norwegian Cruise Line Holdings,NCLH,,United States,S&P 500
+NOS,NOS,,Portugal,PSI
+Novabase,NBA,,Portugal,PSI
+Novartis International AG,NOVN,,Switzerland,SMI
+Novo Nordisk,B,,Denmark,OMX Copenhagen 25
+Novonesis,B,,Denmark,OMX Copenhagen 25
+NRG Energy,NRG,,United States,S&P 500
+Nucor,NUE,,United States,S&P 500
+Nvidia,NVDA,,United States,S&P 500
+"NVR, Inc.",NVR,,United States,S&P 500
+NXP Semiconductors,NXPI,,United States,S&P 500
+O'Reilly Automotive,ORLY,,United States,S&P 500
+Occidental Petroleum,OXY,,United States,S&P 500
+"Okta, Inc.",OKTA,,United States,S&P 500
+Old Dominion,ODFL,,United States,S&P 500
+Omnicom Group,OMC,,United States,S&P 500
+ON Semiconductor,ON,,United States,S&P 500
+Oneok,OKE,,United States,S&P 500
+Oracle Corporation,ORCL,,United States,S&P 500
+Orange,ORA.PA,,France,CAC 40
+Orion,ORNBV.HE,,Finland,OMX Helsinki 25
+Orkla,ORK,,Norway,OBX
+Otis Worldwide,OTIS,,United States,S&P 500
+Outokumpu,OUT1V.HE,,Finland,OMX Helsinki 25
+Paccar,PCAR,,United States,S&P 500
+Packaging Corporation of America,PKG,,United States,S&P 500
+Palantir Technologies,PLTR,,United States,S&P 500
+Palo Alto Networks,PANW,,United States,S&P 500
+Pandora,PNDORA,,Denmark,OMX Copenhagen 25
+Parker Hannifin,PH,,United States,S&P 500
+Partners Group Holding AG,PGHN,,Switzerland,SMI
+Paychex,PAYX,,United States,S&P 500
+PayPal,PYPL,,United States,S&P 500
+Pearson plc,PSON,GB0006776081,United Kingdom,FTSE 100
+Pentair,PNR,,United States,S&P 500
+PepsiCo,PEP,,United States,S&P 500
+Pernod Ricard,RI.PA,,France,CAC 40
+Pershing Square Holdings,PSH,GG00BPFJTF46,United Kingdom,FTSE 100
+Pfizer,PFE,,United States,S&P 500
+PG&E Corporation,PCG,,United States,S&P 500
+Pharol,PHR,,Portugal,PSI
+Philip Morris International,PM,,United States,S&P 500
+Philips,PHIA.AS,,Netherlands,AEX
+Phillips 66,PSX,,United States,S&P 500
+Pinnacle West Capital,PNW,,United States,S&P 500
+Pirelli & C.,PIRC.MI,IT0005278236,Italy,FTSE MIB
+PNC Financial Services,PNC,,United States,S&P 500
+Polar Capital Technology Trust,PCT,GB00BR3YV268,United Kingdom,FTSE 100
+Porsche SE,PAH3.DE,,Germany,DAX
+Poste italiane,PST.MI,IT0003796171,Italy,FTSE MIB
+PPG Industries,PPG,,United States,S&P 500
+PPL Corporation,PPL,,United States,S&P 500
+Principal Financial Group,PFG,,United States,S&P 500
+Procter & Gamble,PG,,United States,S&P 500
+Progressive Corporation,PGR,,United States,S&P 500
+Prologis,PLD,,United States,S&P 500
+Prosus,PRX.AS,,Netherlands,AEX
+Prudential Financial,PRU,,United States,S&P 500
+Prudential plc,PRU,GB0007099541,United Kingdom,FTSE 100
+Prysmian,PRY.MI,IT0004176001,Italy,FTSE MIB
+PTC Inc.,PTC,,United States,S&P 500
+Public Service Enterprise Group,PEG,,United States,S&P 500
+Public Storage,PSA,,United States,S&P 500
+Publicis,PUB.PA,,France,CAC 40
+Puig,PUIG.MC,,Spain,IBEX 35
+PulteGroup,PHM,,United States,S&P 500
+Qiagen,QIA.DE,,Germany,DAX
+Qnity Electronics,Q,,United States,S&P 500
+Qt Group,QTCOM.HE,,Finland,OMX Helsinki 25
+Qualcomm,QCOM,,United States,S&P 500
+Quanta Services,PWR,,United States,S&P 500
+Quest Diagnostics,DGX,,United States,S&P 500
+Ralph Lauren Corporation,RL,,United States,S&P 500
+Randstad,RAND.AS,,Netherlands,AEX
+Raymond James Financial,RJF,,United States,S&P 500
+Realty Income,O,,United States,S&P 500
+Reckitt,RKT,GB00BSZBP530,United Kingdom,FTSE 100
+Reddit,RDDT,,United States,S&P 500
+Redeia Corporación,RED.MC,,Spain,IBEX 35
+Redes Energéticas Nacionais,RENE,,Portugal,PSI
+Regency Centers,REG,,United States,S&P 500
+Regeneron Pharmaceuticals,REGN,,United States,S&P 500
+Regions Financial Corporation,RF,,United States,S&P 500
+RELX,REL,GB00B2B0DG97,United Kingdom,FTSE 100
+Renault,RNO.PA,,France,CAC 40
+Rentokil Initial,RTO,GB00B082RF11,United Kingdom,FTSE 100
+Repsol,REP.MC,,Spain,IBEX 35
+Republic Services,RSG,,United States,S&P 500
+ResMed,RMD,,United States,S&P 500
+Revvity,RVTY,,United States,S&P 500
+Rheinmetall,RHM.DE,,Germany,DAX
+Rio Tinto,RIO,GB0007188757,United Kingdom,FTSE 100
+Robinhood Markets,HOOD,,United States,S&P 500
+Roche Holding AG,ROP,,Switzerland,SMI
+Rockwell Automation,ROK,,United States,S&P 500
+Rockwool International,B,,Denmark,OMX Copenhagen 25
+"Rollins, Inc.",ROL,,United States,S&P 500
+Rolls-Royce Holdings,RR,GB00B63H8491,United Kingdom,FTSE 100
+Roper Technologies,ROP,,United States,S&P 500
+Ross Stores,ROST,,United States,S&P 500
+Royal Caribbean Group,RCL,,United States,S&P 500
+Royal Unibrew,RBREW,,Denmark,OMX Copenhagen 25
+RTX Corporation,RTX,,United States,S&P 500
+RWE,RWE.DE,,Germany,DAX
+S&P Global,SPGI,,United States,S&P 500
+Saab B,SAAB-B.ST,,Sweden,OMX Stockholm 30
+Sacyr,SCYR.MC,,Spain,IBEX 35
+Safran,SAF.PA,,France,CAC 40
+Sage Group,SGE,GB00B8C3BL03,United Kingdom,FTSE 100
+Sainsbury's,SBRY,GB00B019KW72,United Kingdom,FTSE 100
+Saint-Gobain,SGO.PA,,France,CAC 40
+Saipem,SPM.MI,IT0005495657,Italy,FTSE MIB
+Salesforce,CRM,,United States,S&P 500
+SalMar,SALM,,Norway,OBX
+Sampo A,SAMPO.HE,,Finland,OMX Helsinki 25
+Sandisk,SNDK,,United States,S&P 500
+Sandoz,SDZ,,Switzerland,SMI
+Sandvik,SAND.ST,,Sweden,OMX Stockholm 30
+Sanofi,SAN.PA,,France,CAC 40
+Santander,SAN.MC,,Spain,IBEX 35
+SAP,SAP.DE,,Germany,DAX
+SBA Communications,SBAC,,United States,S&P 500
+SCA B,SCA-B.ST,,Sweden,OMX Stockholm 30
+Schlumberger,SLB,,United States,S&P 500
+Schneider Electric,SU.PA,,France,CAC 40
+Scottish Mortgage Investment Trust,SMT,GB00BLDYK618,United Kingdom,FTSE 100
+Scout24,G24.DE,,Germany,DAX
+Seagate Technology,STX,,United States,S&P 500
+SEB A,SEB-A.ST,,Sweden,OMX Stockholm 30
+Segro,SGRO,GB00B5ZN1N88,United Kingdom,FTSE 100
+Semapa,SEM,,Portugal,PSI
+Sempra,SRE,,United States,S&P 500
+ServiceNow,NOW,,United States,S&P 500
+Severn Trent,SVT,GB00B1FH8J72,United Kingdom,FTSE 100
+Shell plc,SHEL,GB00BP6MXD84,United Kingdom,FTSE 100
+Sherwin-Williams,SHW,,United States,S&P 500
+Siemens,SIE.DE,,Germany,DAX
+Siemens Energy,ENR.DE,,Germany,DAX
+Siemens Healthineers,SHL.DE,,Germany,DAX
+Sika AG,SIKA,,Switzerland,SMI
+Simon Property Group,SPG,,United States,S&P 500
+Skanska B,SKA-B.ST,,Sweden,OMX Stockholm 30
+SKF B,SKF-B.ST,,Sweden,OMX Stockholm 30
+Skydance,SKYD,,United States,S&P 500
+Skyworks Solutions,SWKS,,United States,S&P 500
+Smith & Nephew,SN,GB0009223206,United Kingdom,FTSE 100
+Smiths Group,SMIN,GB00B1WY2338,United Kingdom,FTSE 100
+Smurfit Westrock,SW,,United States,S&P 500
+Snam,SRG.MI,IT0003153415,Italy,FTSE MIB
+Snap-on,SNA,,United States,S&P 500
+Société Générale,GLE.PA,,France,CAC 40
+Sofina,SOF,,Belgium,BEL 20
+Solaria,SLR.MC,,Spain,IBEX 35
+Solvay,SOLB,,Belgium,BEL 20
+Solventum,SOLV,,United States,S&P 500
+Sonae,SON,,Portugal,PSI
+Sonae Capital,SONC,,Portugal,PSI
+Southern Company,SO,,United States,S&P 500
+Southwest Airlines,LUV,,United States,S&P 500
+Spirax Group,SPX,GB00BWFGQN14,United Kingdom,FTSE 100
+SSE plc,SSE,GB0007908733,United Kingdom,FTSE 100
+St. James's Place,STJ,GB0007669376,United Kingdom,FTSE 100
+Standard Chartered,STAN,GB0004082847,United Kingdom,FTSE 100
+Standard Life,SDLF,GB00BGXQNP29,United Kingdom,FTSE 100
+Stanley Black & Decker,SWK,,United States,S&P 500
+Starbucks,SBUX,,United States,S&P 500
+State Street Corporation,STT,,United States,S&P 500
+Steel Dynamics,STLD,,United States,S&P 500
+Stellantis,STLAP.PA,NL00150001Q9,France,CAC 40
+Steris,STE,,United States,S&P 500
+STMicroelectronics,STMPA.PA,NL0000226223,France,CAC 40
+Stora Enso R,STERV.HE,,Finland,OMX Helsinki 25
+Storebrand,STB,,Norway,OBX
+Stryker Corporation,SYK,,United States,S&P 500
+Subsea 7,SUBC,,Norway,OBX
+Supermicro,SMCI,,United States,S&P 500
+Swedbank A,SWED-A.ST,,Sweden,OMX Stockholm 30
+Swiss Life Holding AG,SLHN,,Switzerland,SMI
+Swiss Reinsurance Company Ltd,SREN,,Switzerland,SMI
+Swisscom AG,SCMN,,Switzerland,SMI
+Syensqo,SYENS,,Belgium,BEL 20
+Symrise,SY1.DE,,Germany,DAX
+Synchrony Financial,SYF,,United States,S&P 500
+Synopsys,SNPS,,United States,S&P 500
+Sysco,SYY,,United States,S&P 500
+T-Mobile US,TMUS,,United States,S&P 500
+T. Rowe Price,TROW,,United States,S&P 500
+Take-Two Interactive,TTWO,,United States,S&P 500
+"Tapestry, Inc.",TPR,,United States,S&P 500
+Targa Resources,TRGP,,United States,S&P 500
+Target Corporation,TGT,,United States,S&P 500
+TE Connectivity,TEL,,United States,S&P 500
+Technoprobe,TPRO.MI,IT0005482333,Italy,FTSE MIB
+Tele2 B,TEL2-B.ST,,Sweden,OMX Stockholm 30
+Telecom Italia,TIT.MI,IT0005712671,Italy,FTSE MIB
+Teledyne Technologies,TDY,,United States,S&P 500
+Telefónica,TEF.MC,,Spain,IBEX 35
+Telenor,TEL,,Norway,OBX
+Telia Company,TELIA.ST,,Sweden,OMX Stockholm 30
+Tenaris,TEN.MI,LU2598331598,Italy,FTSE MIB
+Teradyne,TER,,United States,S&P 500
+Terna,TRN.MI,IT0003242622,Italy,FTSE MIB
+Tesco,TSCO,GB00BLGZ9862,United Kingdom,FTSE 100
+"Tesla, Inc.",TSLA,,United States,S&P 500
+Texas Instruments,TXN,,United States,S&P 500
+Texas Pacific Land Corporation,TPL,,United States,S&P 500
+Textron,TXT,,United States,S&P 500
+TGS ASA,TGS,,Norway,OBX
+Thales,HO.PA,,France,CAC 40
+The Navigator Company,NVG,,Portugal,PSI
+Thermo Fisher Scientific,TMO,,United States,S&P 500
+TietoEVRY,TIETO.HE,,Finland,OMX Helsinki 25
+TJX Companies,TJX,,United States,S&P 500
+TKO Group Holdings,TKO,,United States,S&P 500
+Tomra Systems,TOM,,Norway,OBX
+TotalEnergies,TTE.PA,,France,CAC 40
+Tractor Supply,TSCO,,United States,S&P 500
+Trane Technologies,TT,,United States,S&P 500
+TransDigm Group,TDG,,United States,S&P 500
+Travelers Companies (The),TRV,,United States,S&P 500
+Trimble Inc.,TRMB,,United States,S&P 500
+Tritax Big Box REIT,BBOX,GB00BG49KP99,United Kingdom,FTSE 100
+Truist Financial,TFC,,United States,S&P 500
+Tryg,TRYG,,Denmark,OMX Copenhagen 25
+Twilio,TWLO,,United States,S&P 500
+Tyler Technologies,TYL,,United States,S&P 500
+Tyson Foods,TSN,,United States,S&P 500
+U.S. Bancorp,USB,,United States,S&P 500
+Uber,UBER,,United States,S&P 500
+UBS Group AG,UBSG,,Switzerland,SMI
+UCB,UCB,,Belgium,BEL 20
+"UDR, Inc.",UDR,,United States,S&P 500
+Ulta Beauty,ULTA,,United States,S&P 500
+Umicore,UMI,,Belgium,BEL 20
+Unibail-Rodamco-Westfield,URW.PA,,France,CAC 40
+Unicaja,UNI.MC,,Spain,IBEX 35
+UniCredit,UCG.MI,IT0005239360,Italy,FTSE MIB
+Unilever,ULVR,GB00BVZK7T90,United Kingdom,FTSE 100
+Union Pacific Corporation,UNP,,United States,S&P 500
+Unipol,UNI.MI,IT0004810054,Italy,FTSE MIB
+United Airlines Holdings,UAL,,United States,S&P 500
+United Parcel Service,UPS,,United States,S&P 500
+United Rentals,URI,,United States,S&P 500
+United Utilities,UU,GB00B39J2M42,United Kingdom,FTSE 100
+UnitedHealth Group,UNH,,United States,S&P 500
+Universal Health Services,UHS,,United States,S&P 500
+Universal Music Group,UMG.AS,,Netherlands,AEX
+UPM-Kymmene,UPM.HE,,Finland,OMX Helsinki 25
+Valero Energy,VLO,,United States,S&P 500
+Valmet,VALMT.HE,,Finland,OMX Helsinki 25
+Veeva Systems,VEEV,,United States,S&P 500
+Ventas,VTR,,United States,S&P 500
+Veolia,VIE.PA,,France,CAC 40
+Veralto,VLTO,,United States,S&P 500
+Verisign,VRSN,,United States,S&P 500
+Verisk Analytics,VRSK,,United States,S&P 500
+Verizon,VZ,,United States,S&P 500
+Vertex Pharmaceuticals,VRTX,,United States,S&P 500
+Vertiv,VRT,,United States,S&P 500
+Vestas Wind Systems,VWS,,Denmark,OMX Copenhagen 25
+Viatris,VTRS,,United States,S&P 500
+Vici Properties,VICI,,United States,S&P 500
+Vinci,DG.PA,,France,CAC 40
+Vinci SA,DG.PA,,France,EURO STOXX 50
+Visa Inc.,V,,United States,S&P 500
+Vistra Corp.,VST,,United States,S&P 500
+Vivmark Residential,VMRK,,United States,S&P 500
+Vodafone Group,VOD,GB00BH4HKS39,United Kingdom,FTSE 100
+Volkswagen Group,VOW3.DE,,Germany,DAX
+Volvo B,VOLV-B.ST,,Sweden,OMX Stockholm 30
+Vonovia,VNA.DE,,Germany,DAX
+Vulcan Materials Company,VMC,,United States,S&P 500
+Vylor,VYLR,,United States,S&P 500
+Vår Energi ASA,VAR,,Norway,OBX
+W. R. Berkley Corporation,WRB,,United States,S&P 500
+W. W. Grainger,GWW,,United States,S&P 500
+Wabtec,WAB,,United States,S&P 500
+Wallenius Wilhelmsen,WAWI,,Norway,OBX
+Walmart,WMT,,United States,S&P 500
+Walt Disney Company (The),DIS,,United States,S&P 500
+Waste Management,WM,,United States,S&P 500
+Waters Corporation,WAT,,United States,S&P 500
+WDP [nl],WDP,,Belgium,BEL 20
+WEC Energy Group,WEC,,United States,S&P 500
+Weir,WEIR,GB0009465807,United Kingdom,FTSE 100
+Wells Fargo,WFC,,United States,S&P 500
+Welltower,WELL,,United States,S&P 500
+West Pharmaceutical Services,WST,,United States,S&P 500
+Western Digital,WDC,,United States,S&P 500
+Weyerhaeuser,WY,,United States,S&P 500
+Whitbread,WTB,GB00B1KJJ408,United Kingdom,FTSE 100
+Williams Companies,WMB,,United States,S&P 500
+"Williams-Sonoma, Inc.",WSM,,United States,S&P 500
+Willis Towers Watson,WTW,,United States,S&P 500
+Wolters Kluwer,WKL.AS,,Netherlands,AEX
+"Workday, Inc.",WDAY,,United States,S&P 500
+WPP,WPP,JE00B8KF9B49,United Kingdom,FTSE 100
+Wynn Resorts,WYNN,,United States,S&P 500
+Wärtsilä,WRT1V.HE,,Finland,OMX Helsinki 25
+Xcel Energy,XEL,,United States,S&P 500
+Xylem Inc.,XYL,,United States,S&P 500
+Yara International,YAR,,Norway,OBX
+Yum! Brands,YUM,,United States,S&P 500
+Zalando,ZAL.DE,,Germany,DAX
+Zealand Pharma,ZEAL,,Denmark,OMX Copenhagen 25
+Zebra Technologies,ZBRA,,United States,S&P 500
+Zimmer Biomet,ZBH,,United States,S&P 500
+Zoetis,ZTS,,United States,S&P 500
+Zurich Insurance Group AG,ZURN,,Switzerland,SMI
+Ørsted,ORSTED,,Denmark,OMX Copenhagen 25

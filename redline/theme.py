@@ -37,6 +37,9 @@ HELP = {
                             "Alerts.",
     "Holding Screening": "Checks chosen companies against chosen criteria now, with a new web search per company and "
                          "criterion. The results of the run appear below it; all stored results are in Company Profiles.",
+    "Pre-investment Screening": "Checks a company outside the investment universe before you invest, with a new web search "
+                                "per criterion. The company is kept as a pre-investment company with its own Company Profile "
+                                "and can be added to the universe as a prospect.",
     "Company Profile": "Stored results for one company: status per criterion, revenue exposure with its source, the status "
                        "summary and all findings with their dates. Opening a profile runs no new web search.",
     "Alerts": "Breaches and companies on watch found by Portfolio Monitoring, and imported provider incidents. Manual "

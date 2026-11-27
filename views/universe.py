@@ -26,7 +26,8 @@ def saved(message: str) -> None:
 
 
 try:
-    companies = db.holdings()
+    every = db.holdings(candidates=True)     # pre-investment companies are matched too, then join the universe
+    companies = [h for h in every if h["type"] != "candidate"]
 except db.DataError as e:
     st.error(str(e))
     st.stop()
@@ -40,7 +41,10 @@ def upload_panel() -> None:
         st.download_button("Download sample file", SAMPLE.read_bytes(), "universe.csv", "text/csv")
         return
     try:
-        plan = importers.plan_universe_import(importers.read_table(importers.decode(file.getvalue())), companies)
+        plan = importers.plan_universe_import(importers.read_table(importers.decode(file.getvalue())), every)
+        for record in plan["records"]:
+            if record["type"] == "candidate":
+                record["type"] = "holding"
     except importers.ImportProblem as e:
         st.error(str(e))
         return
@@ -88,7 +92,7 @@ def add_panel() -> None:
         st.error("Enter a company name.")
     elif isin and not importers.valid_isin(isin):
         st.error("The ISIN is not valid.")
-    elif importers.find_company(companies, isin=isin, ticker=ticker, name=name):
+    elif importers.find_company(every, isin=isin, ticker=ticker, name=name):
         st.error("This company is already in the universe.")
     else:
         try:
